@@ -1,0 +1,13 @@
+{
+    "name": "yourname/maternal-child-care",
+    "description": "سایت مراقبت مادر و کودک",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "require": {
+        "php": ">=8.0"
+    }
+}
