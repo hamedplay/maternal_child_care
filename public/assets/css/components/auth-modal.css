@@ -1,0 +1,448 @@
+/* ============================================================
+   پس‌زمینه‌ی تیره‌ی مودال
+   ============================================================ */
+.auth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(15, 33, 51, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: authFadeIn 0.2s ease;
+}
+
+.auth-modal-overlay[hidden] {
+    display: none;
+}
+
+@keyframes authFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ============================================================
+   کارت مودال
+   ============================================================ */
+.auth-modal {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    background: var(--color-white);
+    border-radius: 28px;
+    padding: 36px 30px 30px;
+    box-shadow: 0 20px 60px rgba(15, 33, 51, 0.25);
+    animation: authPopIn 0.25s ease;
+}
+
+@keyframes authPopIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.auth-modal-close {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-bg);
+    color: var(--color-gray);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.auth-modal-close:hover {
+    background: var(--color-bg-soft-2);
+    color: var(--color-navy);
+}
+
+.auth-modal-brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.auth-modal-brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-teal), var(--color-navy));
+    color: #fff;
+}
+
+/* ============================================================
+   عناصر مشترک مراحل
+   ============================================================ */
+.auth-title {
+    font-family: var(--font-bold);
+    font-size: 1.25rem;
+    color: var(--color-navy);
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.auth-subtitle {
+    font-family: var(--font-regular);
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.auth-phone-display {
+    font-family: var(--font-medium);
+    color: var(--color-navy);
+    unicode-bidi: embed;
+}
+
+.auth-dev-note {
+    text-align: center;
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: #b45309;
+    background: rgba(217, 119, 6, 0.08);
+    border: 1.5px dashed rgba(217, 119, 6, 0.35);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    direction: ltr;
+    unicode-bidi: plaintext;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.auth-field-label {
+    font-family: var(--font-medium);
+    font-size: 0.82rem;
+    color: var(--color-navy);
+}
+
+.auth-phone-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-bg);
+    border: 1.5px solid var(--color-bg);
+    border-radius: 14px;
+    padding: 13px 16px;
+    transition: all 0.2s ease;
+}
+
+.auth-phone-input-wrapper:focus-within {
+    border-color: var(--color-teal);
+    background: var(--color-white);
+}
+
+.auth-phone-input-wrapper svg {
+    flex-shrink: 0;
+    color: var(--color-gray);
+}
+
+.auth-phone-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-medium);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    color: var(--color-navy);
+    text-align: left;
+}
+
+.auth-phone-input::placeholder {
+    color: var(--color-gray);
+    letter-spacing: normal;
+}
+
+.auth-field-error {
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    color: #dc2626;
+}
+
+.auth-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--color-teal), var(--color-navy));
+    color: #fff;
+    font-family: var(--font-medium);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 16px rgba(46, 196, 182, 0.3);
+}
+
+.auth-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(46, 196, 182, 0.4);
+}
+
+.auth-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-terms {
+    font-family: var(--font-regular);
+    font-size: 0.75rem;
+    color: var(--color-gray);
+    text-align: center;
+    margin-top: 18px;
+    line-height: 1.8;
+}
+
+.auth-terms a {
+    color: var(--color-teal-text);
+    text-decoration: none;
+}
+
+.auth-terms a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================
+   مرحله‌ی OTP
+   ============================================================ */
+.auth-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--color-teal-text);
+    font-family: var(--font-medium);
+    font-size: 0.82rem;
+    cursor: pointer;
+    margin-bottom: 14px;
+    padding: 0;
+}
+
+.auth-otp-boxes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.auth-otp-box {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-family: var(--font-bold);
+    font-size: 1.4rem;
+    color: var(--color-navy);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 14px;
+    background: var(--color-bg);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.auth-otp-box:focus {
+    border-color: var(--color-teal);
+    background: var(--color-white);
+    box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.15);
+}
+
+.auth-otp-boxes.auth-otp-error .auth-otp-box {
+    border-color: #fca5a5;
+}
+
+.auth-resend-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.auth-resend-timer {
+    font-family: var(--font-regular);
+    font-size: 0.82rem;
+    color: var(--color-gray);
+}
+
+.auth-resend-btn {
+    background: none;
+    border: none;
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-teal-text);
+    cursor: pointer;
+}
+
+.auth-resend-btn:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================
+   مرحله‌ی موفقیت
+   ============================================================ */
+.auth-step-success {
+
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 4px;
+}
+
+.auth-success-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(46, 196, 182, 0.14);
+    color: var(--color-teal-hover);
+    margin-bottom: 16px;
+    animation: authSuccessPop 0.35s ease;
+}
+
+@keyframes authSuccessPop {
+    from {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.auth-step-success .auth-subtitle {
+    margin-bottom: 0;
+}
+
+/* ============================================================
+   ریسپانسیو
+   ============================================================ */
+@media (max-width: 480px) {
+    .auth-modal {
+        padding: 30px 20px 24px;
+        border-radius: 22px;
+    }
+
+    .auth-otp-box {
+        width: 42px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .auth-otp-boxes {
+        gap: 8px;
+    }
+}
+
+/* ============================================================
+   منوی پروفایل (وقتی کاربر لاگین کرده)
+   ============================================================ */
+.profile-menu {
+    position: relative;
+}
+
+.profile-menu .profile-icon {
+    position: relative;
+}
+
+.profile-online-dot {
+    position: absolute;
+    bottom: -1px;
+    left: -1px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-teal);
+    border: 2px solid var(--color-white);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    min-width: 220px;
+    background: var(--color-white);
+    border-radius: 18px;
+    box-shadow: 0 12px 36px rgba(15, 33, 51, 0.15);
+    padding: 14px;
+    z-index: 500;
+    animation: authPopIn 0.18s ease;
+}
+
+.profile-dropdown[hidden] {
+    display: none;
+}
+
+.profile-dropdown-phone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 14px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--color-bg);
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-navy);
+}
+
+.profile-dropdown-phone svg {
+    color: var(--color-gray);
+    flex-shrink: 0;
+}
+
+.profile-dropdown-logout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 12px;
+    font-family: var(--font-medium);
+    font-size: 0.86rem;
+    color: #dc2626;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.profile-dropdown-logout:hover {
+    background: rgba(220, 38, 38, 0.08);
+}

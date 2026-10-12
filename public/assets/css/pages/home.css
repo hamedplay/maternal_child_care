@@ -1,0 +1,780 @@
+/* سکشن سفید متصل به هدر */
+.banner-section {
+    max-width: 1200px;
+    margin: 20px auto 0 auto;
+    padding: 20px 20px 40px 20px;
+    position: relative;
+    background: var(--color-white);
+    border-radius: 32px;
+    z-index: 1;
+}
+
+/* بنر */
+.banner-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
+    min-height: 500px;
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-bg-soft-2) 100%);
+}
+
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    min-height: 400px;
+}
+
+/* پین شده به سمت چپ کارت (فضای خالی عکس)، مستقل از جهت RTL */
+.banner-content {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    padding: 60px 50px;
+    max-width: 55%;
+    color: var(--color-navy);
+}
+
+.banner-content h1 {
+    font-family: var(--font-bold);
+    font-size: 2.4rem;
+    line-height: 1.3;
+    margin-bottom: 16px;
+    color: var(--color-navy);
+}
+
+.banner-content .subtitle {
+    font-family: var(--font-regular);
+    font-size: 1.3rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    margin-bottom: 28px;
+    max-width: 100%;
+}
+
+/* دکمه‌ی داخل بنر، جای‌گیری اختصاصی این صفحه‌ست، نه استایل عمومی دکمه */
+.banner-content .btn-primary {
+    position: absolute;
+    left: 50px;
+}
+
+/* ============================================================
+   محتوای پایین صفحه (کارت‌ها)
+   ============================================================ */
+.content-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 0px 20px 0px;
+}
+
+/* ============================================================
+   ریسپانسیو
+   ============================================================ */
+@media (max-width: 992px) {
+    .banner-content {
+        padding: 50px 40px;
+        max-width: 65%;
+    }
+
+    .banner-content h1 {
+        font-size: 2.2rem;
+    }
+
+    .banner-content .subtitle {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .banner-section {
+        padding: 0 16px 30px 16px;
+        margin-top: -12px;
+        border-radius: 0 0 24px 24px;
+    }
+
+    .banner-wrapper {
+        min-height: 350px;
+        border-radius: 24px;
+        margin-top: 30px;
+    }
+
+    .banner-image {
+        min-height: 350px;
+    }
+
+    .banner-content {
+        padding: 40px 30px;
+        max-width: 70%;
+    }
+
+    .banner-content h1 {
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+    }
+
+    .banner-content .subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .banner-section {
+        padding: 0 12px 20px 12px;
+        margin-top: -10px;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .banner-wrapper {
+        min-height: 300px;
+        border-radius: 20px;
+        margin-top: 25px;
+    }
+
+    .banner-image {
+        min-height: 300px;
+    }
+
+    .banner-overlay {
+        background: rgba(234, 246, 251, 0.9);
+    }
+
+    .banner-content {
+        padding: 30px 24px;
+        left: 0;
+        right: 0;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .banner-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .banner-content .subtitle {
+        font-size: 0.85rem;
+    }
+
+    .content-section {
+        padding: 20px 12px 10px 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .banner-section {
+        padding: 0 8px 16px 8px;
+        margin-top: -8px;
+        border-radius: 0 0 16px 16px;
+    }
+
+    .banner-wrapper {
+        min-height: 260px;
+        border-radius: 16px;
+        margin-top: 20px;
+    }
+
+    .banner-image {
+        min-height: 260px;
+    }
+
+    .banner-content {
+        padding: 20px 16px;
+    }
+
+    .banner-content h1 {
+        font-size: 1.2rem;
+    }
+
+    .banner-content .subtitle {
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================================
+   هدر مشترک سکشن‌ها (این هفته از بارداری / آمار / مقالات)
+   ============================================================ */
+.section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.section-header h2 {
+    font-family: var(--font-bold);
+    font-size: 1.5rem;
+    color: var(--color-navy);
+    margin-bottom: 6px;
+}
+
+.section-subtitle {
+    font-family: var(--font-regular);
+    font-size: 0.95rem;
+    color: var(--color-slate);
+}
+
+.section-link {
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-teal-text);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.section-link:hover {
+    color: var(--color-navy);
+}
+
+/* ============================================================
+   این هفته از بارداری
+   ============================================================ */
+.pregnancy-week-section {
+    max-width: 1200px;
+    margin: 48px auto 0 auto;
+    padding: 0 20px;
+}
+
+.week-widget {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-bg-soft-2) 100%);
+    border-radius: 28px;
+    padding: 36px 40px;
+}
+
+.week-badge {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: var(--color-white);
+    box-shadow: 0 8px 24px rgba(31, 78, 121, 0.1);
+}
+
+.week-badge-number {
+    font-family: var(--font-bold);
+    font-size: 2.4rem;
+    line-height: 1;
+    color: var(--color-navy);
+}
+
+.week-badge-label {
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-teal-text);
+    margin-top: 4px;
+}
+
+.week-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.week-size {
+    font-family: var(--font-medium);
+    font-size: 1.05rem;
+    color: var(--color-navy);
+    margin-bottom: 8px;
+}
+
+.week-description {
+    font-family: var(--font-regular);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    margin-bottom: 14px;
+}
+
+.week-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    font-family: var(--font-regular);
+    font-size: 0.85rem;
+    color: var(--color-slate);
+    margin-bottom: 20px;
+}
+
+.week-cta {
+    display: inline-flex;
+}
+
+.week-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    margin-top: 20px;
+}
+
+/* فرم انتخاب هفته */
+.week-selector-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.week-selector-label {
+    font-family: var(--font-regular);
+    font-size: 0.85rem;
+    color: var(--color-slate);
+    white-space: nowrap;
+}
+
+.week-selector-select {
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 12px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.week-selector-select:focus {
+    outline: none;
+    border-color: var(--color-teal-text);
+}
+
+.week-selector-submit {
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.week-selector-submit:hover {
+    border-color: var(--color-teal-text);
+    color: var(--color-teal-text);
+}
+
+/* CTA بازاریابی زیر ویجت */
+.week-marketing-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 16px;
+    padding: 20px 28px;
+    background: var(--color-white);
+    border: 1.5px dashed var(--color-bg-soft-2);
+    border-radius: 20px;
+}
+
+.week-marketing-cta p {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    margin: 0;
+}
+
+.week-marketing-cta strong {
+    font-family: var(--font-medium);
+    color: var(--color-navy);
+}
+
+.week-marketing-cta-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.week-widget-empty {
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+}
+
+.week-widget-empty p {
+    font-family: var(--font-regular);
+    color: var(--color-slate);
+}
+
+/* ============================================================
+   نوار آماری
+   ============================================================ */
+.stats-bar-section {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding: 0 20px;
+}
+
+.stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    background: var(--color-white);
+    border: 1px solid var(--color-bg-soft-2);
+    border-radius: 24px;
+    padding: 28px 20px;
+    box-shadow: 0 8px 30px rgba(31, 78, 121, 0.05);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 0 12px;
+    position: relative;
+}
+
+.stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: var(--color-bg-soft-2);
+}
+
+.stat-value {
+    font-family: var(--font-bold);
+    font-size: 2rem;
+    color: var(--color-teal-text);
+}
+
+.stat-label {
+    font-family: var(--font-regular);
+    font-size: 0.85rem;
+    color: var(--color-slate);
+}
+
+/* ============================================================
+   تیزر آخرین مقالات
+   ============================================================ */
+.articles-teaser-section {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding: 0 20px;
+}
+
+.articles-empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    border: 1.5px dashed var(--color-bg-soft-2);
+    border-radius: 24px;
+    background: var(--color-bg);
+}
+
+.articles-empty-state p {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    color: var(--color-gray);
+}
+
+/* ============================================================
+   تیزر سوالات متداول (FAQ accordion)
+   ============================================================ */
+.faq-teaser-section {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding: 0 20px;
+}
+
+.faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.faq-item {
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 18px;
+    padding: 4px 20px;
+    transition: border-color 0.2s ease;
+}
+
+.faq-item[open] {
+    border-color: var(--color-teal-text);
+}
+
+.faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    font-family: var(--font-medium);
+    font-size: 0.95rem;
+    color: var(--color-navy);
+    cursor: pointer;
+    list-style: none;
+}
+
+.faq-question::-webkit-details-marker {
+    display: none;
+}
+
+.faq-chevron {
+    flex-shrink: 0;
+    color: var(--color-teal-text);
+    transition: transform 0.2s ease;
+}
+
+.faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--color-slate);
+    padding-bottom: 18px;
+}
+
+.faq-empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    border: 1.5px dashed var(--color-bg-soft-2);
+    border-radius: 24px;
+    background: var(--color-bg);
+}
+
+.faq-empty-state p {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    color: var(--color-gray);
+}
+
+/* ============================================================
+   تیزر نظرات کاربران
+   ============================================================ */
+.testimonials-section {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding: 0 20px;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.testimonial-card {
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.testimonial-rating {
+    display: flex;
+    gap: 2px;
+    color: #F5B301;
+}
+
+.testimonial-content {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--color-slate);
+    flex: 1;
+}
+
+.testimonial-author {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-bg-soft-2);
+}
+
+.testimonial-name {
+    font-family: var(--font-medium);
+    font-size: 0.88rem;
+    color: var(--color-navy);
+}
+
+.testimonial-role {
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    color: var(--color-gray);
+}
+
+.testimonials-empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    border: 1.5px dashed var(--color-bg-soft-2);
+    border-radius: 24px;
+    background: var(--color-bg);
+}
+
+.testimonials-empty-state p {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    color: var(--color-gray);
+}
+
+/* ============================================================
+   CTA پایانی (ثبت‌نام)
+   ============================================================ */
+.signup-cta-section {
+    max-width: 1200px;
+    margin: 48px auto 0 auto;
+    padding: 0 20px;
+}
+
+.signup-cta-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    background: linear-gradient(120deg, var(--color-navy) 0%, var(--color-teal) 100%);
+    border-radius: 28px;
+    padding: 40px 48px;
+}
+
+.signup-cta-text h2 {
+    font-family: var(--font-bold);
+    font-size: 1.4rem;
+    color: var(--color-white);
+    margin-bottom: 8px;
+}
+
+.signup-cta-text p {
+    font-family: var(--font-regular);
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.8;
+}
+
+.btn-secondary-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    font-family: var(--font-medium);
+    font-size: 0.92rem;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: none;
+    border-radius: 999px;
+    padding: 14px 26px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-secondary-light:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================
+   ریسپانسیو سکشن‌های تازه
+   ============================================================ */
+@media (max-width: 768px) {
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .signup-cta-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 24px;
+    }
+}
+
+/* ============================================================
+   ریسپانسیو بخش‌های جدید
+   ============================================================ */
+@media (max-width: 768px) {
+    .week-widget {
+        flex-direction: column;
+        text-align: center;
+        padding: 28px 24px;
+        gap: 20px;
+    }
+
+    .week-meta {
+        justify-content: center;
+    }
+
+    .week-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .week-selector-form {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .week-marketing-cta {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+        row-gap: 24px;
+    }
+
+    .stat-item:nth-child(2)::after {
+        display: none;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 400px) {
+    .week-badge {
+        width: 90px;
+        height: 90px;
+    }
+
+    .week-badge-number {
+        font-size: 2rem;
+    }
+
+    .stats-bar {
+        padding: 20px 16px;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+    }
+}

@@ -1,0 +1,304 @@
+/* ============================================================
+   سکشن ترکیبی «بارداری / کودک»
+   ============================================================ */
+.mother-baby-section {
+    max-width: 1200px;
+    margin: 48px auto 0 auto;
+    padding: 0 20px;
+}
+
+/* سوییچ حالت */
+.mode-switch {
+    display: flex;
+    gap: 6px;
+    width: fit-content;
+    max-width: 100%;
+    background: var(--color-bg);
+    border-radius: 999px;
+    padding: 6px;
+    margin-bottom: 24px;
+}
+
+.mode-switch-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-slate);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.mode-switch-btn.active {
+    color: var(--color-white);
+    background: var(--color-navy);
+    box-shadow: 0 6px 16px rgba(31, 78, 121, 0.25);
+}
+
+.mode-switch-btn:not(.active):hover {
+    color: var(--color-navy);
+}
+
+/* پنل‌ها */
+.mode-panel {
+    display: none;
+}
+
+.mode-panel.active {
+    display: block;
+}
+
+/* کارت نتیجه */
+.mode-result-card {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-bg-soft-2) 100%);
+    border-radius: 28px;
+    padding: 36px 40px;
+    margin-bottom: 16px;
+}
+
+.mode-result-badge {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: var(--color-white);
+    box-shadow: 0 8px 24px rgba(31, 78, 121, 0.1);
+}
+
+.mode-result-badge-number {
+    font-family: var(--font-bold);
+    font-size: 2.4rem;
+    line-height: 1;
+    color: var(--color-navy);
+}
+
+.mode-result-badge-label {
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-teal-text);
+    margin-top: 4px;
+}
+
+.mode-result-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.mode-result-summary {
+    font-family: var(--font-medium);
+    font-size: 1.02rem;
+    line-height: 1.9;
+    color: var(--color-navy);
+    margin-bottom: 10px;
+}
+
+.mode-result-desc {
+    font-family: var(--font-regular);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    margin-bottom: 14px;
+}
+
+.mode-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    font-family: var(--font-regular);
+    font-size: 0.85rem;
+    color: var(--color-slate);
+    margin-bottom: 20px;
+}
+
+.mode-result-milestones-title {
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-navy);
+    margin-bottom: 10px;
+}
+
+.mode-milestone-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.mode-milestone-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    color: var(--color-slate);
+}
+
+.mode-milestone-category {
+    flex-shrink: 0;
+    font-family: var(--font-medium);
+    font-size: 0.72rem;
+    color: var(--color-teal-text);
+    background: var(--color-white);
+    border-radius: 8px;
+    padding: 3px 8px;
+}
+
+.mode-result-cta {
+    display: inline-flex;
+}
+
+.mode-result-empty {
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+}
+
+.mode-result-empty p {
+    font-family: var(--font-regular);
+    color: var(--color-slate);
+}
+
+/* فرم انتخاب (هفته / جنسیت-سن) */
+.mode-select-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.mode-select-form label {
+    font-family: var(--font-regular);
+    font-size: 0.85rem;
+    color: var(--color-slate);
+    white-space: nowrap;
+}
+
+.mode-select-form select {
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 12px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.mode-select-form select:focus {
+    outline: none;
+    border-color: var(--color-teal-text);
+}
+
+.mode-select-form button {
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-select-form button:hover {
+    border-color: var(--color-teal-text);
+    color: var(--color-teal-text);
+}
+
+/* CTA بازاریابی */
+.mode-marketing-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 20px 28px;
+    background: var(--color-white);
+    border: 1.5px dashed var(--color-bg-soft-2);
+    border-radius: 20px;
+}
+
+.mode-marketing-cta p {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    margin: 0;
+}
+
+.mode-marketing-cta strong {
+    font-family: var(--font-medium);
+    color: var(--color-navy);
+}
+
+.mode-marketing-cta .btn-primary {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   ریسپانسیو موبایل
+   ============================================================ */
+@media (max-width: 768px) {
+    .mode-switch {
+        width: 100%;
+    }
+
+    .mode-switch-btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 0.82rem;
+        padding: 10px 8px;
+    }
+
+    .mode-result-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 28px 24px;
+        gap: 20px;
+    }
+
+    .mode-result-meta {
+        justify-content: center;
+    }
+
+    .mode-select-form {
+        justify-content: center;
+    }
+
+    .mode-marketing-cta {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 400px) {
+    .mode-result-badge {
+        width: 90px;
+        height: 90px;
+    }
+
+    .mode-result-badge-number {
+        font-size: 2rem;
+    }
+
+    .mode-switch-btn svg {
+        display: none;
+    }
+}

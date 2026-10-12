@@ -1,0 +1,201 @@
+/* ============================================================
+   ویجت شناور تماس با پشتیبانی
+   ============================================================ */
+.support-widget {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 1200;
+}
+
+.support-fab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-medium);
+    color: var(--color-white);
+    background: var(--color-teal-text);
+    border: none;
+    border-radius: 999px;
+    padding: 14px 18px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(64, 172, 200, 0.4);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.support-fab:hover {
+    background: var(--color-teal-hover);
+    transform: translateY(-2px);
+}
+
+.support-fab-label {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* پنل */
+.support-panel {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 0;
+    width: 320px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    background: var(--color-white);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: all 0.25s ease;
+}
+
+.support-widget.is-open .support-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.support-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.support-panel-header h3 {
+    font-family: var(--font-bold);
+    font-size: 1.05rem;
+    color: var(--color-navy);
+}
+
+.support-close {
+    display: flex;
+    color: var(--color-slate);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.support-close:hover {
+    background: var(--color-bg);
+    color: var(--color-navy);
+}
+
+.support-subtitle {
+    font-family: var(--font-regular);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--color-slate);
+    margin-bottom: 14px;
+}
+
+.support-error {
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: #C0392B;
+    background: #FDEDEC;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.support-hint {
+    font-family: var(--font-regular);
+    font-size: 0.72rem;
+    color: var(--color-gray);
+    margin-top: 4px;
+}
+
+/* فرم */
+.support-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.support-form label {
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    color: var(--color-slate);
+    margin-top: 8px;
+}
+
+.support-form input,
+.support-form select,
+.support-form textarea {
+    font-family: var(--font-regular);
+    font-size: 0.88rem;
+    color: var(--color-navy);
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.support-form select {
+    cursor: pointer;
+}
+
+.support-form input:focus,
+.support-form select:focus,
+.support-form textarea:focus {
+    outline: none;
+    border-color: var(--color-teal-text);
+    background: var(--color-white);
+}
+
+.support-submit {
+    margin-top: 16px;
+    width: 100%;
+    justify-content: center;
+}
+
+/* پیام موفقیت */
+.support-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    color: var(--color-teal-text);
+    padding: 16px 6px 6px 6px;
+}
+
+.support-success p {
+    font-family: var(--font-regular);
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+}
+
+/* ============================================================
+   ریسپانسیو موبایل
+   ============================================================ */
+@media (max-width: 576px) {
+    .support-widget {
+        bottom: 16px;
+        left: 16px;
+    }
+
+    .support-fab-label {
+        display: none;
+    }
+
+    .support-fab {
+        padding: 14px;
+    }
+
+    .support-panel {
+        width: calc(100vw - 32px);
+    }
+}

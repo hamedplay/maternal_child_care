@@ -1,0 +1,457 @@
+/* ============================================================
+   سکشن سفید متصل به هدر (هیرو صفحه‌ی مکمل‌ها)
+   ============================================================ */
+.ps-hero {
+    max-width: 1200px;
+    margin: 20px auto 0 auto;
+    padding: 20px 20px 40px 20px;
+    position: relative;
+    background: var(--color-white);
+    border-radius: 32px;
+    z-index: 1;
+}
+
+.ps-hero-banner {
+    position: relative;
+    width: 100%;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
+    min-height: 340px;
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-bg-soft-2) 100%);
+}
+
+.ps-hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    min-height: 280px;
+}
+
+.ps-hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 50px;
+    max-width: 52%;
+    color: var(--color-navy);
+}
+
+.ps-hero-content h1 {
+    font-family: var(--font-bold);
+    font-size: 2.1rem;
+    line-height: 1.3;
+    margin-bottom: 12px;
+    color: var(--color-navy);
+}
+
+.ps-hero-content .subtitle {
+    font-family: var(--font-regular);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    max-width: 100%;
+}
+
+.ps-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-teal-text);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 999px;
+    padding: 8px 18px;
+    margin-bottom: 18px;
+}
+
+/* ============================================================
+   تب‌های فیلتر سه‌ماهه
+   ============================================================ */
+.ps-filter-section {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding: 0 20px;
+}
+
+.ps-filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ps-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-slate);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 999px;
+    padding: 10px 20px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.ps-filter-tab:hover {
+    border-color: var(--color-teal-text);
+    color: var(--color-teal-text);
+}
+
+.ps-filter-tab.active {
+    background: var(--color-navy);
+    border-color: var(--color-navy);
+    color: var(--color-white);
+}
+
+.ps-filter-tab-range {
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    opacity: 0.8;
+}
+
+/* ============================================================
+   گروه‌های سه‌ماهه + گرید کارت‌های مکمل
+   ============================================================ */
+.ps-list-section {
+    max-width: 1200px;
+    margin: 36px auto 0 auto;
+    padding: 0 20px;
+}
+
+.ps-group {
+    margin-bottom: 40px;
+}
+
+.ps-group-title {
+    font-family: var(--font-bold);
+    font-size: 1.25rem;
+    color: var(--color-navy);
+    margin-bottom: 18px;
+    padding-right: 14px;
+    border-right: 4px solid var(--color-teal);
+}
+
+.ps-supplement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.ps-supplement-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-bg-soft-2);
+    border-radius: 24px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.25s ease;
+}
+
+.ps-supplement-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(31, 78, 121, 0.08);
+}
+
+.ps-supplement-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ps-supplement-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-bg-soft);
+    color: var(--color-teal);
+}
+
+.ps-supplement-header h3 {
+    font-family: var(--font-bold);
+    font-size: 1.05rem;
+    color: var(--color-navy);
+}
+
+.ps-supplement-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ps-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-medium);
+    font-size: 0.74rem;
+    border-radius: 999px;
+    padding: 4px 12px;
+}
+
+.ps-badge-essential {
+    background: rgba(46, 196, 182, 0.14);
+    color: var(--color-teal-hover);
+}
+
+.ps-badge-optional {
+    background: var(--color-bg);
+    color: var(--color-gray);
+}
+
+.ps-badge-rx {
+    background: rgba(217, 119, 6, 0.12);
+    color: #b45309;
+}
+
+.ps-supplement-importance {
+    font-family: var(--font-regular);
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: var(--color-slate);
+}
+
+.ps-supplement-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-family: var(--font-regular);
+    font-size: 0.88rem;
+    line-height: 1.75;
+    padding-top: 6px;
+    border-top: 1px dashed var(--color-bg-soft-2);
+}
+
+.ps-supplement-row-label {
+    font-family: var(--font-medium);
+    font-size: 0.78rem;
+    color: var(--color-navy);
+}
+
+.ps-supplement-row-value {
+    color: var(--color-slate);
+}
+
+.ps-supplement-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 4px;
+    background: rgba(217, 119, 6, 0.08);
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: #b45309;
+}
+
+.ps-supplement-warning svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.ps-supplement-warning p {
+    font-family: var(--font-regular);
+    font-size: 0.85rem;
+    line-height: 1.75;
+    color: #92400e;
+}
+
+.ps-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--color-white);
+    border: 1px solid var(--color-bg-soft-2);
+    border-radius: 24px;
+}
+
+.ps-empty-state p {
+    font-family: var(--font-regular);
+    color: var(--color-slate);
+}
+
+/* ============================================================
+   تذکر پزشکی کلی
+   ============================================================ */
+.ps-disclaimer-section {
+    max-width: 1200px;
+    margin: 8px auto 0 auto;
+    padding: 0 20px;
+}
+
+.ps-disclaimer-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--color-bg-soft);
+    border-radius: 20px;
+    padding: 20px 24px;
+    color: var(--color-teal-text);
+}
+
+.ps-disclaimer-box svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.ps-disclaimer-box p {
+    font-family: var(--font-regular);
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--color-navy);
+}
+
+/* ============================================================
+   CTA بازاریابی
+   ============================================================ */
+.ps-cta-section {
+    max-width: 1200px;
+    margin: 24px auto 48px auto;
+    padding: 0 20px;
+}
+
+.ps-cta-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 32px;
+    background: var(--color-white);
+    border: 1.5px dashed var(--color-bg-soft-2);
+    border-radius: 20px;
+}
+
+.ps-cta-box p {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    margin: 0;
+}
+
+.ps-cta-box strong {
+    font-family: var(--font-medium);
+    color: var(--color-navy);
+}
+
+.ps-cta-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   ریسپانسیو
+   ============================================================ */
+@media (max-width: 992px) {
+    .ps-hero-content {
+        max-width: 68%;
+        padding: 40px;
+    }
+
+    .ps-hero-content h1 {
+        font-size: 1.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .ps-hero {
+        padding: 0 16px 30px 16px;
+        margin-top: -12px;
+        border-radius: 0 0 24px 24px;
+    }
+
+    .ps-hero-banner {
+        min-height: 260px;
+        border-radius: 24px;
+        margin-top: 30px;
+    }
+
+    .ps-hero-image {
+        min-height: 220px;
+    }
+
+    .ps-hero-overlay {
+        background: rgba(234, 246, 251, 0.9);
+    }
+
+    .ps-hero-content {
+        max-width: 100%;
+        padding: 30px 26px;
+        text-align: center;
+    }
+
+    .ps-hero-content h1 {
+        font-size: 1.6rem;
+    }
+
+    .ps-hero-content .subtitle {
+        font-size: 0.92rem;
+    }
+
+    .ps-hero-badge {
+        margin-bottom: 14px;
+    }
+
+    .ps-filter-tabs {
+        justify-content: center;
+    }
+
+    .ps-supplement-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ps-disclaimer-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ps-cta-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 22px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .ps-hero {
+        padding: 0 12px 20px 12px;
+        margin-top: -10px;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .ps-hero-banner {
+        min-height: 220px;
+        border-radius: 20px;
+        margin-top: 25px;
+    }
+
+    .ps-hero-image {
+        min-height: 200px;
+    }
+
+    .ps-group-title {
+        font-size: 1.1rem;
+    }
+
+    .ps-supplement-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 400px) {
+    .ps-hero-content h1 {
+        font-size: 1.35rem;
+    }
+}

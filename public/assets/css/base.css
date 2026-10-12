@@ -1,0 +1,60 @@
+/* ============================================================
+   فونت‌ها
+   ============================================================ */
+@font-face {
+    font-family: 'IranVekanWebBold';
+    src: url('../fonts/iranyekanwebbold.e298fdc6.e298fdc6.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'IranVekanWebMedium';
+    src: url('../fonts/iranvekanwebmedium.dium.2d4f96e5.2d4f96e5.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'IranVekanWebRegular';
+    src: url('../fonts/iranvekanwebregulare.ular.b95439c1.b95439c1.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* ============================================================
+   متغیرهای رنگی مشترک — به‌جای کپی رنگ‌ها توی هر فایل، همه‌جا
+   از این متغیرها استفاده کنید تا تغییر رنگ سایت یک‌جا انجام بشه
+   ============================================================ */
+:root {
+    --color-navy: #1F4E79;
+    --color-teal-text: #40acc8;
+    --color-teal: #2EC4B6;
+    --color-navy-hover: #265d90;
+    --color-teal-hover: #26a89c;
+    --color-slate: #55707F;
+    --color-gray: #6B7280;
+    --color-bg: #F5F7FA;
+    --color-bg-soft: #EAF6FB;
+    --color-bg-soft-2: #DCF3F6;
+    --color-white: #FFFFFF;
+
+    --font-bold: 'IranVekanWebBold', sans-serif;
+    --font-medium: 'IranVekanWebMedium', sans-serif;
+    --font-regular: 'IranVekanWebRegular', sans-serif;
+}
+
+/* ============================================================
+   ریست و پایه
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-regular);
+    background: var(--color-bg);
+    min-height: 100vh;
+}

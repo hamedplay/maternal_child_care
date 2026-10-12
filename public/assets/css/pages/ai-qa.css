@@ -1,0 +1,580 @@
+/* ============================================================
+   صفحه‌ی پرسش و پاسخ با هوش مصنوعی — طراحی مدرن دوستونه
+   ============================================================ */
+.aiqa-page {
+    background: var(--color-bg);
+    padding: 24px 20px 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.aiqa-layout {
+    width: 100%;
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ============================================================
+   سایدبار: موضوعات پیشنهادی
+   ============================================================ */
+.aiqa-sidebar {
+    background: var(--color-white);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 4px 24px rgba(31, 78, 121, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 100px;
+    min-height: 560px;
+}
+
+.aiqa-sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-bold);
+    font-size: 1.05rem;
+    color: var(--color-navy);
+}
+
+.aiqa-sidebar-title svg {
+    color: var(--color-teal);
+}
+
+.aiqa-topic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.aiqa-topic-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: right;
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: 18px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-regular);
+}
+
+.aiqa-topic-card:hover {
+    background: var(--color-bg-soft);
+    border-color: var(--color-bg-soft-2);
+    transform: translateX(-2px);
+}
+
+.aiqa-topic-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: var(--color-bg-soft);
+    color: var(--color-teal);
+}
+
+.aiqa-topic-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.aiqa-topic-text strong {
+    font-family: var(--font-medium);
+    font-size: 0.92rem;
+    color: var(--color-navy);
+}
+
+.aiqa-topic-text small {
+    font-family: var(--font-regular);
+    font-size: 0.76rem;
+    color: var(--color-gray);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aiqa-topic-chevron {
+    flex-shrink: 0;
+    color: var(--color-gray);
+}
+
+.aiqa-sidebar-decor {
+    margin-top: auto;
+    width: 100%;
+    height: auto;
+    opacity: 0.9;
+}
+
+/* ============================================================
+   پنل اصلی گفتگو
+   ============================================================ */
+.aiqa-main {
+    background: var(--color-white);
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(31, 78, 121, 0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 720px;
+}
+
+.aiqa-main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--color-bg);
+}
+
+.aiqa-assistant-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.aiqa-assistant-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-teal), var(--color-navy));
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.aiqa-assistant-info h3 {
+    font-family: var(--font-bold);
+    font-size: 1rem;
+    color: var(--color-navy);
+}
+
+.aiqa-assistant-info p {
+    font-family: var(--font-regular);
+    font-size: 0.8rem;
+    color: var(--color-gray);
+}
+
+.aiqa-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-medium);
+    font-size: 0.8rem;
+    color: var(--color-teal-hover);
+}
+
+.aiqa-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-teal);
+    box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.2);
+}
+
+/* ============================================================
+   ناحیه‌ی چت
+   ============================================================ */
+.aiqa-chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- صفحه‌ی خوش‌آمدگویی --- */
+.aiqa-welcome {
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 20px 10px;
+}
+
+.aiqa-mascot {
+    width: 200px;
+    max-width: 60%;
+}
+
+.aiqa-mascot-svg {
+    width: 100%;
+    height: auto;
+}
+
+.aiqa-welcome h1 {
+    font-family: var(--font-bold);
+    font-size: 1.5rem;
+    color: var(--color-navy);
+    margin-top: 6px;
+}
+
+.aiqa-welcome p {
+    font-family: var(--font-regular);
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--color-slate);
+    max-width: 420px;
+}
+
+.aiqa-quick-prompts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+    width: 100%;
+    max-width: 480px;
+}
+
+.aiqa-quick-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--color-bg-soft);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 16px;
+    padding: 12px 16px;
+    font-family: var(--font-medium);
+    font-size: 0.88rem;
+    color: var(--color-navy);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.aiqa-quick-chip:hover {
+    background: var(--color-white);
+    border-color: var(--color-teal);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(46, 196, 182, 0.15);
+}
+
+.aiqa-quick-chip-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background: var(--color-white);
+    color: var(--color-teal);
+    flex-shrink: 0;
+}
+
+/* --- پیام‌های گفتگو --- */
+.aiqa-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.aiqa-message {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: 78%;
+    width: fit-content;
+}
+
+/* در چیدمان RTL: flex-start = سمت راست، flex-end = سمت چپ */
+.aiqa-message.user {
+    align-self: flex-start;
+    flex-direction: row-reverse;
+}
+
+.aiqa-message.assistant {
+    align-self: flex-end;
+}
+
+.aiqa-message-avatar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-teal), var(--color-navy));
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.aiqa-message-avatar.aiqa-message-avatar-user {
+    background: linear-gradient(135deg, #8ba0ad, var(--color-slate));
+}
+
+.aiqa-message .bubble {
+    width: fit-content;
+    max-width: 100%;
+    text-align: right;
+    padding: 13px 17px;
+    border-radius: 18px;
+    font-family: var(--font-regular);
+    font-size: 0.92rem;
+    line-height: 1.9;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.aiqa-message.user .bubble {
+    background: var(--color-white);
+    color: var(--color-navy);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 2px 10px rgba(31, 78, 121, 0.05);
+}
+
+.aiqa-message.assistant .bubble {
+    background: linear-gradient(135deg, var(--color-teal), #279c96);
+    color: #fff;
+    border-bottom-left-radius: 6px;
+}
+
+/* پیام‌هایی که با aiqa_markdown_lite / markdownLiteToHtml رندر شدن (خطوط جدید با <br> صریحه) */
+.aiqa-message .bubble.bubble-rich {
+    white-space: normal;
+}
+
+.aiqa-md-heading {
+    display: block;
+    font-family: var(--font-bold);
+    font-size: 0.97rem;
+    margin: 10px 0 5px;
+}
+
+.aiqa-md-heading:first-child {
+    margin-top: 0;
+}
+
+.aiqa-message .bubble strong {
+    font-family: var(--font-bold);
+}
+
+.aiqa-message.assistant.typing .bubble {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 15px 18px;
+}
+
+.aiqa-typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    animation: aiqaTypingBlink 1.2s infinite ease-in-out;
+}
+
+.aiqa-typing-dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.aiqa-typing-dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes aiqaTypingBlink {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0.35;
+        transform: scale(0.85);
+    }
+
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ============================================================
+   فرم ارسال سوال
+   ============================================================ */
+.aiqa-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 24px;
+    padding: 8px 8px 8px 8px;
+    background: var(--color-bg);
+    border-radius: 999px;
+}
+
+.aiqa-attach-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-white);
+    color: var(--color-gray);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.aiqa-form textarea {
+    flex: 1;
+    resize: none;
+    border: none;
+    outline: none;
+    font-family: var(--font-regular);
+    font-size: 0.92rem;
+    padding: 10px 6px;
+    max-height: 120px;
+    background: transparent;
+    color: var(--color-navy);
+}
+
+.aiqa-form textarea::placeholder {
+    color: var(--color-gray);
+}
+
+.aiqa-send-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--color-teal), var(--color-navy));
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(46, 196, 182, 0.35);
+}
+
+.aiqa-send-btn:hover {
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(46, 196, 182, 0.45);
+}
+
+.aiqa-send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ============================================================
+   تذکر پایین صفحه
+   ============================================================ */
+.aiqa-disclaimer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: var(--font-regular);
+    font-size: 0.76rem;
+    color: var(--color-gray);
+    text-align: center;
+    padding: 14px 24px 18px;
+}
+
+.aiqa-disclaimer svg {
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   ریسپانسیو
+   ============================================================ */
+@media (max-width: 992px) {
+    .aiqa-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .aiqa-sidebar {
+        position: static;
+        min-height: auto;
+    }
+
+    .aiqa-topic-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .aiqa-topic-card {
+        flex-direction: column;
+        text-align: center;
+        min-width: 130px;
+        gap: 8px;
+    }
+
+    .aiqa-topic-chevron {
+        display: none;
+    }
+
+    .aiqa-sidebar-decor {
+        display: none;
+    }
+
+    .aiqa-main {
+        min-height: 600px;
+    }
+}
+
+@media (max-width: 600px) {
+    .aiqa-page {
+        padding: 16px 12px 40px;
+    }
+
+    .aiqa-sidebar {
+        padding: 16px;
+        border-radius: 20px;
+    }
+
+    .aiqa-main {
+        border-radius: 20px;
+    }
+
+    .aiqa-main-header {
+        padding: 14px 16px;
+    }
+
+    .aiqa-chat {
+        padding: 16px;
+    }
+
+    .aiqa-form {
+        margin: 0 16px;
+    }
+
+    .aiqa-message {
+        max-width: 92%;
+    }
+
+    .aiqa-quick-prompts {
+        grid-template-columns: 1fr;
+    }
+
+    .aiqa-mascot {
+        width: 160px;
+    }
+
+    .aiqa-welcome h1 {
+        font-size: 1.25rem;
+    }
+}

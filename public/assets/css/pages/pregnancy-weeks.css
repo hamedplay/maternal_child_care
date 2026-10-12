@@ -1,0 +1,512 @@
+/* ============================================================
+   سکشن سفید متصل به هدر (هیرو صفحه‌ی هفته به هفته)
+   ============================================================ */
+.pw-hero {
+    max-width: 1200px;
+    margin: 20px auto 0 auto;
+    padding: 20px 20px 40px 20px;
+    position: relative;
+    background: var(--color-white);
+    border-radius: 32px;
+    z-index: 1;
+}
+
+.pw-hero-banner {
+    position: relative;
+    width: 100%;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.05);
+    min-height: 340px;
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-bg-soft-2) 100%);
+}
+
+.pw-hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    min-height: 280px;
+}
+
+.pw-hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 50px;
+    max-width: 58%;
+    color: var(--color-navy);
+}
+
+.pw-hero-content h1 {
+    font-family: var(--font-bold);
+    font-size: 2.1rem;
+    line-height: 1.3;
+    margin-bottom: 12px;
+    color: var(--color-navy);
+}
+
+.pw-hero-content .subtitle {
+    font-family: var(--font-regular);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    max-width: 100%;
+}
+
+.pw-trimester-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-teal-text);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 999px;
+    padding: 8px 18px;
+    margin-bottom: 18px;
+}
+
+/* ============================================================
+   نوار انتخاب هفته (پیل‌های اسکرول‌شونده)
+   ============================================================ */
+.pw-week-nav-section {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding: 0 20px;
+}
+
+.pw-trimester-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.pw-trimester-link {
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-slate);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 999px;
+    padding: 9px 18px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.pw-trimester-link:hover {
+    border-color: var(--color-teal-text);
+    color: var(--color-teal-text);
+}
+
+.pw-trimester-link.active {
+    background: var(--color-navy);
+    border-color: var(--color-navy);
+    color: var(--color-white);
+}
+
+.pw-week-pills-wrapper {
+    background: var(--color-white);
+    border: 1px solid var(--color-bg-soft-2);
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: 0 8px 30px rgba(31, 78, 121, 0.05);
+}
+
+.pw-week-pills {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-behavior: smooth;
+}
+
+.pw-week-pills::-webkit-scrollbar {
+    height: 6px;
+}
+
+.pw-week-pills::-webkit-scrollbar-thumb {
+    background: var(--color-bg-soft-2);
+    border-radius: 999px;
+}
+
+.pw-week-pill {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 8px;
+    border-radius: 14px;
+    background: var(--color-bg);
+    color: var(--color-slate);
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pw-week-pill:hover {
+    background: var(--color-bg-soft);
+    color: var(--color-navy);
+}
+
+.pw-week-pill.active {
+    background: linear-gradient(135deg, var(--color-teal), var(--color-navy));
+    color: var(--color-white);
+    box-shadow: 0 4px 14px rgba(46, 196, 182, 0.35);
+}
+
+/* ============================================================
+   کارت اصلی جزئیات هفته
+   ============================================================ */
+.pw-detail-section {
+    max-width: 1200px;
+    margin: 32px auto 0 auto;
+    padding: 0 20px;
+}
+
+.pw-detail-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-bg-soft-2) 100%);
+    border-radius: 28px;
+    padding: 40px;
+}
+
+.pw-detail-badge {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--color-white);
+    box-shadow: 0 8px 24px rgba(31, 78, 121, 0.1);
+}
+
+.pw-detail-badge-number {
+    font-family: var(--font-bold);
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--color-navy);
+}
+
+.pw-detail-badge-label {
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-teal-text);
+    margin-top: 4px;
+}
+
+.pw-detail-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.pw-detail-summary {
+    font-family: var(--font-medium);
+    font-size: 1.1rem;
+    color: var(--color-navy);
+    margin-bottom: 12px;
+}
+
+.pw-detail-desc {
+    font-family: var(--font-regular);
+    font-size: 0.98rem;
+    line-height: 1.9;
+    color: var(--color-slate);
+    margin-bottom: 18px;
+}
+
+.pw-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    font-family: var(--font-regular);
+    font-size: 0.88rem;
+    color: var(--color-slate);
+    margin-bottom: 8px;
+}
+
+.pw-detail-meta span {
+    background: var(--color-white);
+    border-radius: 999px;
+    padding: 6px 16px;
+}
+
+.pw-detail-empty {
+    justify-content: center;
+    text-align: center;
+    padding: 50px;
+}
+
+.pw-detail-empty p {
+    font-family: var(--font-regular);
+    color: var(--color-slate);
+}
+
+/* دکمه‌های قبلی / بعدی */
+.pw-nav-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.pw-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-medium);
+    font-size: 0.9rem;
+    color: var(--color-navy);
+    background: var(--color-white);
+    border: 1.5px solid var(--color-bg-soft-2);
+    border-radius: 999px;
+    padding: 12px 22px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pw-nav-btn:hover {
+    border-color: var(--color-teal-text);
+    color: var(--color-teal-text);
+}
+
+.pw-nav-btn[aria-disabled="true"] {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.pw-nav-btn-next svg {
+    transform: rotate(180deg);
+}
+
+/* ============================================================
+   تغییرات مادر / نکات پزشکی
+   ============================================================ */
+.pw-info-grid {
+    max-width: 1200px;
+    margin: 24px auto 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.pw-info-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-bg-soft-2);
+    border-radius: 24px;
+    padding: 28px;
+}
+
+.pw-info-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.pw-info-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-bg-soft);
+    color: var(--color-teal);
+    flex-shrink: 0;
+}
+
+.pw-info-card h3 {
+    font-family: var(--font-bold);
+    font-size: 1.05rem;
+    color: var(--color-navy);
+}
+
+.pw-info-card p {
+    font-family: var(--font-regular);
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: var(--color-slate);
+}
+
+/* ============================================================
+   CTA بازاریابی
+   ============================================================ */
+.pw-cta-section {
+    max-width: 1200px;
+    margin: 40px auto 48px auto;
+    padding: 0 20px;
+}
+
+.pw-cta-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 32px;
+    background: var(--color-white);
+    border: 1.5px dashed var(--color-bg-soft-2);
+    border-radius: 20px;
+}
+
+.pw-cta-box p {
+    font-family: var(--font-regular);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+    margin: 0;
+}
+
+.pw-cta-box strong {
+    font-family: var(--font-medium);
+    color: var(--color-navy);
+}
+
+.pw-cta-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   ریسپانسیو
+   ============================================================ */
+@media (max-width: 992px) {
+    .pw-hero-content {
+        max-width: 68%;
+        padding: 40px;
+    }
+
+    .pw-hero-content h1 {
+        font-size: 1.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .pw-hero {
+        padding: 0 16px 30px 16px;
+        margin-top: -12px;
+        border-radius: 0 0 24px 24px;
+    }
+
+    .pw-hero-banner {
+        min-height: 260px;
+        border-radius: 24px;
+        margin-top: 30px;
+    }
+
+    .pw-hero-image {
+        min-height: 220px;
+    }
+
+    .pw-hero-overlay {
+        background: rgba(234, 246, 251, 0.9);
+    }
+
+    .pw-hero-content {
+        max-width: 100%;
+        padding: 30px 26px;
+        text-align: center;
+    }
+
+    .pw-hero-content h1 {
+        font-size: 1.6rem;
+    }
+
+    .pw-hero-content .subtitle {
+        font-size: 0.92rem;
+    }
+
+    .pw-trimester-badge {
+        margin-bottom: 14px;
+    }
+
+    .pw-detail-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 28px 24px;
+        gap: 20px;
+    }
+
+    .pw-detail-meta {
+        justify-content: center;
+    }
+
+    .pw-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pw-nav-buttons {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .pw-nav-btn {
+        justify-content: center;
+    }
+
+    .pw-cta-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 22px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .pw-hero {
+        padding: 0 12px 20px 12px;
+        margin-top: -10px;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .pw-hero-banner {
+        min-height: 220px;
+        border-radius: 20px;
+        margin-top: 25px;
+    }
+
+    .pw-hero-image {
+        min-height: 200px;
+    }
+
+    .pw-week-pills-wrapper {
+        padding: 12px;
+    }
+
+    .pw-week-pill {
+        min-width: 40px;
+        height: 40px;
+        font-size: 0.82rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .pw-hero-content h1 {
+        font-size: 1.35rem;
+    }
+
+    .pw-detail-badge {
+        width: 96px;
+        height: 96px;
+    }
+
+    .pw-detail-badge-number {
+        font-size: 2.1rem;
+    }
+}

@@ -1,0 +1,383 @@
+/* ============================================================
+   صفحه‌ی ورود (لاگین با شماره موبایل + کد پیامکی)
+   ============================================================ */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: var(--color-bg);
+}
+
+.login-shell {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    background: var(--color-white);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================================
+   پنل تصویری/برند (سمت راست در RTL)
+   ============================================================ */
+.login-visual {
+    position: relative;
+    overflow: hidden;
+    flex: 0 0 42%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 44px 40px;
+    background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-navy) 100%);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.login-visual-pattern {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.login-visual .logo-area {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.login-visual .logo-image {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.login-visual .logo-text {
+    font-family: var(--font-bold);
+    font-size: 1.15rem;
+    color: #fff;
+}
+
+.login-visual-body {
+    position: relative;
+    z-index: 1;
+}
+
+.login-visual-body h2 {
+    font-family: var(--font-bold);
+    font-size: 1.6rem;
+    line-height: 1.5;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.login-visual-body p {
+    font-family: var(--font-regular);
+    font-size: 0.95rem;
+    line-height: 1.9;
+    max-width: 90%;
+}
+
+.login-visual-badges {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.login-visual-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-medium);
+    font-size: 0.8rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 6px 14px;
+}
+
+/* ============================================================
+   پنل فرم
+   ============================================================ */
+.login-form-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 56px 56px;
+}
+
+.login-form-head {
+    margin-bottom: 32px;
+}
+
+.login-form-head h1 {
+    font-family: var(--font-bold);
+    font-size: 1.6rem;
+    color: var(--color-navy);
+    margin-bottom: 8px;
+}
+
+.login-form-head p {
+    font-family: var(--font-regular);
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: var(--color-slate);
+}
+
+/* مراحل (شماره موبایل / کد تایید) */
+.login-step {
+    display: none;
+}
+
+.login-step.active {
+    display: block;
+}
+
+.login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.login-field label {
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-navy);
+}
+
+.login-phone-input {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: 14px;
+    padding: 0 16px;
+    transition: border-color 0.2s ease;
+}
+
+.login-phone-input:focus-within {
+    border-color: var(--color-teal-text, var(--color-teal));
+    background: var(--color-white);
+}
+
+.login-phone-input .login-country-code {
+    font-family: var(--font-medium);
+    font-size: 0.95rem;
+    color: var(--color-slate);
+    padding-left: 10px;
+    border-left: 1.5px solid var(--color-bg-soft-2);
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.login-phone-input input {
+    flex: 1;
+    direction: ltr;
+    text-align: right;
+    font-family: var(--font-regular);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    color: var(--color-navy);
+    background: transparent;
+    border: none;
+    padding: 14px 0;
+}
+
+.login-phone-input input:focus {
+    outline: none;
+}
+
+.login-field-hint {
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    color: var(--color-gray);
+}
+
+.login-field-error {
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: #C0392B;
+    background: #FDEDEC;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    display: none;
+}
+
+.login-field-error.visible {
+    display: block;
+}
+
+.login-submit {
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.login-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* کد تایید (OTP) */
+.login-otp-target {
+    font-family: var(--font-medium);
+    color: var(--color-navy);
+    direction: ltr;
+    display: inline-block;
+}
+
+.login-otp-inputs {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.login-otp-inputs input {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-family: var(--font-bold);
+    font-size: 1.3rem;
+    color: var(--color-navy);
+    background: var(--color-bg);
+    border: 1.5px solid transparent;
+    border-radius: 14px;
+}
+
+.login-otp-inputs input:focus {
+    outline: none;
+    border-color: var(--color-teal-text, var(--color-teal));
+    background: var(--color-white);
+}
+
+.login-otp-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.login-otp-timer {
+    font-family: var(--font-regular);
+    font-size: 0.82rem;
+    color: var(--color-slate);
+}
+
+.login-otp-timer strong {
+    font-family: var(--font-medium);
+    color: var(--color-navy);
+    direction: ltr;
+    display: inline-block;
+}
+
+.login-otp-resend {
+    font-family: var(--font-medium);
+    font-size: 0.82rem;
+    color: var(--color-teal-text, var(--color-teal));
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.login-otp-resend:disabled {
+    color: var(--color-gray);
+    cursor: not-allowed;
+}
+
+.login-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-medium);
+    font-size: 0.85rem;
+    color: var(--color-slate);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.login-back-link:hover {
+    color: var(--color-navy);
+}
+
+.login-terms {
+    margin-top: 28px;
+    font-family: var(--font-regular);
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--color-gray);
+    text-align: center;
+}
+
+.login-terms a {
+    color: var(--color-teal-text, var(--color-teal));
+    text-decoration: none;
+}
+
+/* ============================================================
+   ریسپانسیو
+   ============================================================ */
+@media (max-width: 900px) {
+    .login-visual {
+        display: none;
+    }
+
+    .login-form-panel {
+        padding: 44px 36px;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-page {
+        padding: 0;
+    }
+
+    .login-shell {
+        border-radius: 0;
+        min-height: 100vh;
+    }
+
+    .login-form-panel {
+        padding: 36px 22px;
+        justify-content: flex-start;
+        padding-top: 56px;
+    }
+
+    .login-otp-inputs input {
+        width: 42px;
+        height: 50px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .login-otp-inputs {
+        gap: 6px;
+    }
+
+    .login-otp-inputs input {
+        width: 36px;
+        height: 46px;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+}
