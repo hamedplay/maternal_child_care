@@ -10,16 +10,8 @@
     background: linear-gradient(135deg, #f2fbfa, #f8fbff);
 }
 
-.profile-hero h1 {
-    margin: 0 0 8px;
-    color: #17324d;
-}
-
-.profile-hero p {
-    margin: 0;
-    color: #607284;
-    line-height: 1.9;
-}
+.profile-hero h1 { margin: 0 0 8px; color: #17324d; }
+.profile-hero p { margin: 0; color: #607284; line-height: 1.9; }
 
 .profile-card {
     background: #fff;
@@ -35,20 +27,9 @@
     gap: 18px;
 }
 
-.profile-field {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.profile-field.full {
-    grid-column: 1 / -1;
-}
-
-.profile-field label {
-    color: #42586b;
-    font-size: 14px;
-}
+.profile-field { display: flex; flex-direction: column; gap: 7px; }
+.profile-field.full { grid-column: 1 / -1; }
+.profile-field label { color: #42586b; font-size: 14px; }
 
 .profile-field input,
 .profile-field select {
@@ -60,16 +41,8 @@
     background: #fff;
 }
 
-.profile-field input[readonly] {
-    background: #f6f8fa;
-    color: #667788;
-}
-
-.profile-actions {
-    margin-top: 22px;
-    display: flex;
-    justify-content: flex-end;
-}
+.profile-field input[readonly] { background: #f6f8fa; color: #667788; }
+.profile-actions { margin-top: 22px; display: flex; justify-content: flex-end; }
 
 .profile-submit {
     min-height: 44px;
@@ -82,22 +55,9 @@
     font: inherit;
 }
 
-.profile-message {
-    margin-bottom: 18px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    line-height: 1.8;
-}
-
-.profile-message.success {
-    background: #effaf5;
-    color: #25634a;
-}
-
-.profile-message.error {
-    background: #fff2f2;
-    color: #8a3535;
-}
+.profile-message { margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; line-height: 1.8; }
+.profile-message.success { background: #effaf5; color: #25634a; }
+.profile-message.error { background: #fff2f2; color: #8a3535; }
 
 .profile-section-title {
     grid-column: 1 / -1;
@@ -107,20 +67,89 @@
     color: #213c53;
 }
 
-.profile-note {
-    margin-top: 18px;
-    color: #68798a;
-    font-size: 14px;
-    line-height: 1.8;
+.profile-note { margin-top: 18px; color: #68798a; font-size: 14px; line-height: 1.8; }
+
+.profile-recommendation-section {
+    margin-top: 28px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #e5edf2;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(26, 53, 77, .05);
 }
 
-@media (max-width: 700px) {
-    .profile-grid {
-        grid-template-columns: 1fr;
-    }
+.profile-recommendation-heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
 
+.profile-recommendation-heading h2 { margin: 0 0 6px; color: #17324d; }
+.profile-recommendation-heading p { margin: 0; color: #6a7b8b; line-height: 1.7; }
+.profile-recommendation-heading > a { color: #166c72; text-decoration: none; white-space: nowrap; }
+
+.profile-quick-grid,
+.profile-recommendation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.profile-quick-card,
+.profile-recommendation-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid #e5edf2;
+    border-radius: 14px;
+    color: #263f54;
+    text-decoration: none;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.profile-quick-card:hover,
+.profile-recommendation-card:hover {
+    transform: translateY(-2px);
+    border-color: #bfdad9;
+    box-shadow: 0 8px 20px rgba(22, 108, 114, .08);
+}
+
+.profile-quick-card strong,
+.profile-recommendation-card h3 { color: #17324d; margin: 0; }
+.profile-quick-card span,
+.profile-recommendation-card p { color: #657789; line-height: 1.75; margin: 0; }
+
+.profile-recommendation-tag {
+    width: fit-content;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #eef8f7;
+    color: #166c72 !important;
+    font-size: 12px;
+}
+
+.profile-faq-list { display: grid; gap: 10px; }
+
+.profile-faq-item {
+    border: 1px solid #e5edf2;
+    border-radius: 12px;
+    padding: 13px 15px;
+}
+
+.profile-faq-item summary {
+    cursor: pointer;
+    color: #263f54;
+    font-family: var(--font-medium);
+}
+
+.profile-faq-item p { color: #617485; line-height: 1.9; margin: 12px 0 0; }
+
+@media (max-width: 700px) {
+    .profile-grid { grid-template-columns: 1fr; }
     .profile-field.full,
-    .profile-section-title {
-        grid-column: auto;
-    }
+    .profile-section-title { grid-column: auto; }
+    .profile-recommendation-heading { flex-direction: column; }
 }
