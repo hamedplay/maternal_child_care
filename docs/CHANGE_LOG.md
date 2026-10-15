@@ -1,22 +1,16 @@
 # مستند تغییرات سامانه Maternal Child Care
 
-این سند مرجع اصلی ثبت تغییراتی است که از این تاریخ به بعد روی سامانه `maternal_child_care` انجام می‌شود.
+این سند مرجع اصلی ثبت تغییرات پروژه است. هدف فقط نگهداری یک فهرست کوتاه از Commitها نیست؛ هر Change باید توضیح دهد چرا تغییر لازم بوده، قبل از آن سیستم چگونه کار می‌کرده، چه چیزی به چه چیزی تبدیل شده، چگونه اجرا شده و چه مقدار از آن واقعاً Validation شده است.
 
-هدف فقط ثبت یک Changelog کوتاه نیست؛ هر تغییر باید به شکلی نوشته شود که بعداً مشخص باشد مسئله چه بوده، ساختار قبل چگونه کار می‌کرده، چرا تغییر انجام شده، چه فایل‌هایی تغییر کرده‌اند، چگونه پیاده‌سازی شده و نتیجه چگونه Validation شده است.
+> مسیر کار: Inspect → Requirement / Root Cause → Minimal Design → Implement → Validate → Document
 
-> اصل اجرایی: Inspect → Requirement / Root Cause → Design → Implement → Validate → Document
+## قواعد ثابت
 
----
-
-## قواعد مستندسازی
-
-1. هیچ تغییر برنامه‌ریزی‌شده‌ای بدون ثبت در این سند نهایی نمی‌شود.
-2. تغییر فقط در Scope درخواست کاربر انجام می‌شود.
-3. در Bug Fix، Symptom و Root Cause از هم جدا نوشته می‌شوند.
-4. نتیجه تست واقعی با نتیجه مورد انتظار اشتباه گرفته نمی‌شود.
-5. اگر Validation کامل ممکن نباشد، محدودیت آن صریح نوشته می‌شود.
-6. نام فایل‌ها و Componentهای تغییرکرده صریحاً ذکر می‌شوند.
-7. تغییرات دیتابیس فقط در صورت نیاز همان Feature انجام می‌شوند.
+1. فقط درخواست اولیه کاربر اجرا می‌شود و Feature خارج از Scope اضافه نمی‌شود.
+2. Repository باید تا جای ممکن Data Access باشد و Business/Retrieval Logic در Service بماند؛ این تفکیک فقط در جاهایی انجام می‌شود که خود درخواست اولیه نیاز داشته است.
+3. تغییر دیتابیس فقط با فایل Migration جدید انجام می‌شود؛ Dump تاریخی ویرایش نمی‌شود.
+4. نتیجه تست واقعی از نتیجه مورد انتظار جدا نوشته می‌شود.
+5. اگر تست End-to-End به credential یا محیط واقعی وابسته باشد، محدودیت صریحاً ثبت می‌شود.
 
 ---
 
@@ -27,17 +21,20 @@
 ### تاریخ
 2026-10-15
 
-### درخواست / مسئله
-پیش از شروع توسعه لازم بود یک مرجع دائمی برای ثبت دلیل، روش اجرا، Before/After، Validation و Rollback تمام تغییرات ایجاد شود.
+### مسئله
+پیش از شروع توسعه، مرجعی برای اینکه بعداً مشخص باشد «چه چیزی چرا تغییر کرده» وجود نداشت.
 
-### وضعیت قبل
-پروژه README داشت، اما سند اختصاصی تاریخچه و منطق تغییرات توسعه‌ای نداشت.
+### تغییر
+`docs/CHANGE_LOG.md` ایجاد شد.
 
-### تصمیم فنی
-فایل مستقل `docs/CHANGE_LOG.md` ایجاد شد تا README روی معرفی پروژه باقی بماند و مستند تغییرات بتواند جزئیات فنی بیشتری نگهداری کند.
+### Before → After
 
-### نتیجه
-از این Change به بعد، تغییرات توسعه‌ای باید در همین سند ثبت شوند.
+**Before:** فقط README برای معرفی پروژه وجود داشت.
+
+**After:** README برای معرفی پروژه باقی ماند و CHANGE_LOG به مرجع آموزشی تغییرات فنی تبدیل شد.
+
+### Validation
+ایجاد فایل روی `main` و قابلیت خواندن آن بررسی شد.
 
 ---
 
@@ -46,299 +43,367 @@
 ### تاریخ
 2026-10-15
 
-### درخواست / مسئله
-کاربر تصریح کرد هیچ Feature یا Refactor خارج از درخواست اولیه انجام نشود. Roadmap اولیه چند فعالیت عمومی مثل Audit گسترده و Hardening مستقل را به‌عنوان فاز اجرایی آورده بود که مستقیماً جزء نیازهای کاربر نبودند.
+### مسئله
+نسخه اولیه Roadmap چند فعالیت عمومی مثل Audit/Hardening مستقل داشت که الزام مستقیم درخواست کاربر نبود.
 
-### وضعیت قبل
-`docs/IMPLEMENTATION_ROADMAP.md` شامل Phase عمومی Audit/Security/Baseline و چند کار جانبی بود.
+### تغییر
+`docs/IMPLEMENTATION_ROADMAP.md` فقط حول نیازهای اصلی بازنویسی شد:
 
-### هدف
-Roadmap فقط شامل همان قابلیت‌هایی باشد که کاربر در درخواست اولیه خواسته است.
-
-### Before → After
-**Before:** فازهای عمومی و فعالیت‌های جانبی نیز جزو برنامه بودند.
-
-**After:** Roadmap فقط روی AI/RAG و جداسازی Data Access، OTP/Kavenegar، محتوای نوزاد/کودک و Crawler، حذف تبلیغات گهواره، Profile/Personalization، Doctor Contact/Reminder و Admin Panel متمرکز شد.
-
-### Validation
-Roadmap بعد از Update از `main` بازخوانی و با درخواست اولیه و Dump واقعی دیتابیس تطبیق داده شد.
+- AI/RAG و جداسازی Data Access
+- OTP/Kavenegar
+- محتوای نوزاد/کودک و Crawler
+- حذف تبلیغات گهواره
+- Profile/Personalization/Logging
+- Doctor Contact و Reminder بله
+- Admin Panel
 
 ### نتیجه
-Scope توسعه قفل شد و هر تغییر باید مستقیماً به یکی از نیازهای اولیه کاربر متصل باشد.
+Roadmap دیگر مجوز انجام کار جانبی خارج از درخواست کاربر نیست.
 
 ---
 
-## MCC-CHANGE-002 — شروع فاز ۱: ایجاد مرز Query Preprocessing و Knowledge Retrieval
+## MCC-CHANGE-002 — ایجاد مرز QueryPreprocessor و KnowledgeRetriever
 
 ### تاریخ
 2026-10-15
 
-### درخواست / مسئله
-در درخواست اولیه، جداسازی منطق AI از دسترسی دیتابیس، تغییر Keyword Processing و ایجاد Retriever مستقل خواسته شده بود.
+### مسئله
+مسیر AI مستقیماً از endpoint وارد `AiKnowledgeRepository` می‌شد و Repository علاوه بر SQL، preprocessing و retrieval logic هم انجام می‌داد.
 
-### وضعیت قبل
-مسیر درخواست AI چنین بود:
+### فایل‌ها
 
-`public/ai-qa-ask.php → AiKnowledgeRepository::search(question) → LlmService`
-
-`AiKnowledgeRepository` علاوه بر SQL، normalize، keyword extraction، تشخیص سن/جنسیت، scoring و context formatting را نیز انجام می‌داد.
-
-### هدف
-ایجاد اولین boundary بدون بازنویسی یک‌باره و پرریسک کل Retrieval.
-
-### فایل‌های تغییرکرده
 - Added: `app/Services/QueryPreprocessor.php`
 - Added: `app/Services/KnowledgeRetriever.php`
 - Updated: `public/ai-qa-ask.php`
 
 ### Before → After
-**Before:**
+
+**Before**
+
 `Endpoint → AiKnowledgeRepository → LlmService`
 
-**After:**
-`Endpoint → KnowledgeRetriever → QueryPreprocessor → AiKnowledgeRepository → LlmService`
+**After**
 
-### جزئیات اجرا
-- نرمال‌سازی `ي/ى/ك` به حروف فارسی.
-- تبدیل اعداد فارسی/عربی به لاتین.
-- تبدیل نیم‌فاصله به فاصله و یکدست‌سازی whitespace.
-- حذف وابستگی مستقیم endpoint به Repository.
+`Endpoint → KnowledgeRetriever → QueryPreprocessor + AiKnowledgeRepository → LlmService`
 
-### Validation
-- PSR-4 و fallback autoloader پروژه بررسی شد.
-- فایل‌های جدید از `main` بازخوانی شدند.
-- endpoint بعد از Update از `KnowledgeRetriever` استفاده می‌کند.
+### پیاده‌سازی
+
+`QueryPreprocessor` در اولین گام این موارد را یکدست کرد:
+
+- `ي / ى → ی`
+- `ك → ک`
+- اعداد فارسی/عربی → لاتین
+- نیم‌فاصله → فاصله
+- whitespace تکراری → یک فاصله
 
 ### نتیجه
-مرز اولیه Retrieval ایجاد شد، اما در این Change هنوز منطق keyword/scoring داخل Repository باقی مانده بود و برای گام بعدی برنامه‌ریزی شد.
+endpoint دیگر مستقیم به Repository وابسته نیست و مرز Retriever مورد درخواست ایجاد شد.
 
 ---
 
-## MCC-CHANGE-003 — تکمیل فاز ۱: جداسازی کامل AI Logic از Data Access
+## MCC-CHANGE-003 — تکمیل جداسازی AI Logic از Data Access
 
 ### تاریخ
 2026-10-15
 
-### درخواست / مسئله
-کاربر صریحاً خواسته بود Repository مربوط به AI همزمان Business Logic و Database Access را نگهداری نکند. بعد از MCC-CHANGE-002 هنوز بخش مهمی از منطق در `AiKnowledgeRepository` باقی مانده بود.
+### مسئله
+بعد از Change قبلی هنوز keyword extraction، stemming، synonym، تشخیص سن/جنسیت، scoring، snippet و Context Building داخل Repository بودند.
 
-### وضعیت قبل از تغییر
-`AiKnowledgeRepository` مسئول extraction، stemming، synonym expansion، تشخیص سن/جنسیت، scoring/ranking، تبدیل HTML به متن، snippet، context building و SQL بود.
+### تصمیم
+سه مسئولیت مستقل شد:
 
-### هدف
-Repository فقط Query اجرا کند و Row خام برگرداند. تمام تحلیل سؤال، ranking و ساخت context به Service layer منتقل شود.
+- `QueryPreprocessor` → تحلیل Query
+- `AiKnowledgeRepository` → فقط Query و Row خام
+- `KnowledgeRetriever` → انتخاب منابع، scoring/ranking و ساخت Context
 
-### تصمیم فنی
-سه مسئولیت مستقل تعریف شد:
+### QueryPreprocessor
+موارد زیر از Repository خارج شدند:
 
-1. `QueryPreprocessor` → تحلیل و نرمال‌سازی Query.
-2. `AiKnowledgeRepository` → فقط Data Access.
-3. `KnowledgeRetriever` → orchestration، scoring/ranking و Context Building.
-
-### فایل‌های تغییرکرده
-
-#### Updated — `app/Services/QueryPreprocessor.php`
-- normalize حروف فارسی/عربی
-- تبدیل اعداد فارسی/عربی
-- stopword filtering
-- stemming سبک
+- STOPWORDS
+- light stemming
 - synonym expansion
-- استخراج سن بر حسب ماه
-- استخراج جنسیت
+- تشخیص سن بر حسب ماه
+- تشخیص جنسیت
+- نرمال‌سازی اعداد فارسی/عربی
 
-`analyze()` خروجی `question`, `keywords`, `age_months`, `gender` تولید می‌کند.
+WORD_NUMBERS از ۱ تا ۲۰ تکمیل شد.
 
-#### Updated — `app/Repositories/AiKnowledgeRepository.php`
-preprocessing، scoring و context formatting حذف شد. Repository فقط متدهای Data Access دارد.
+### AiKnowledgeRepository
+متدهای Data Access ایجاد شدند، از جمله:
 
-#### Updated — `app/Services/KnowledgeRetriever.php`
-source selection، scoring/ranking، HTML-to-text، snippet و context building به Retriever منتقل شد.
+- `findFaqs()`
+- `findArticles()`
+- `findPregnancyNutrition()`
+- `findPregnancyWeeks()`
+- `findPregnancyWarningSigns()`
+- `findPregnancyExercises()`
+- `findPregnancySupplements()`
+- `findMilestonesByAge()`
+- `findMilestonesByKeywords()`
+- `findGrowthByAgeAndGender()`
 
-### Before → After
-**Before:** `Repository = SQL + Preprocessing + Ranking + Context Builder`
+Repository دیگر Context Block تولید نمی‌کند.
 
-**After:**
-- `QueryPreprocessor = Query Analysis`
-- `AiKnowledgeRepository = Database Access Only`
-- `KnowledgeRetriever = Retrieval + Ranking + Context Building`
+### KnowledgeRetriever
+این لایه اکنون مسئول است:
 
-### Keyword Processing
-- اعداد فارسی و عربی مرکزی normalize می‌شوند.
-- WORD_NUMBERS از ۱ تا ۲۰ تکمیل شد.
-- synonym و stemming از Repository خارج شدند.
+- source selection
+- scoring/ranking
+- محدود کردن نتایج هر source
+- HTML → plain text برای article retrieval
+- انتخاب snippet مرتبط
+- ساخت Context Block نهایی
+- سقف کلی ۱۲ block
 
-### Validation / Test
-- فایل‌های نهایی از `main` بازخوانی شدند.
-- `QueryPreprocessor.php` با `php -l` بدون خطای Syntax بود.
-- functional test محلی به دلیل نبود extension `mbstring` در PHP محیط ابزار متوقف شد؛ پروژه قبلاً نیز به `mb_*` وابسته بود.
-
-### نتیجه نهایی
-Database Access مربوط به RAG از preprocessing، ranking و Context Building جدا شد.
+### Validation
+ساختار نهایی روی `main` بازخوانی شد. Syntax `QueryPreprocessor` با `php -l` بدون خطا بود. تست runtime کامل در محیط Validation به دلیل نبود extension `mbstring` ممکن نبود؛ این وابستگی از قبل در پروژه وجود داشته است.
 
 ---
 
-## MCC-CHANGE-004 — شروع فاز ۲: اصلاح چرخه OTP و اتصال صریح Kavenegar SMS
+## MCC-CHANGE-004 — اصلاح Workflow OTP و اتصال صریح Kavenegar SMS
 
 ### تاریخ
 2026-10-15
 
-### درخواست / مسئله
-Login/Register با OTP کاوه‌نگار و verify سمت سرور جزء درخواست اولیه بود.
+### وضعیت واقعی قبل از تغییر
+پروژه از قبل این اجزا را داشت:
 
-### وضعیت قبل
-زیرساخت اصلی از قبل وجود داشت: `AuthService`، `OtpRepository`، `KavenegarService`، endpointهای send/verify، UI OTP و جدول `otp_verifications`.
+- `AuthService`
+- `OtpRepository`
+- `KavenegarService`
+- `auth-send-otp.php`
+- `auth-verify-otp.php`
+- UI کامل OTP در `auth-modal.js`
+- جدول `otp_verifications`
 
-چرخه قبلی:
+پس OTP از صفر بازنویسی نشد.
 
-`generate → invalidate old → persist new → send SMS`
+### Root Cause پیدا شده
+ترتیب قبلی `requestOtp()` چنین بود:
 
-اگر Kavenegar خطا می‌داد، کد قبلی باطل و یک OTP ارسال‌نشده در DB فعال می‌ماند.
+`generate → invalidate previous → persist new OTP → send SMS`
 
-### Root Cause
-Persistence و invalidate قبل از مشخص‌شدن نتیجه Provider انجام می‌شد.
+اگر Kavenegar شکست می‌خورد:
 
-### فایل‌های تغییرکرده
+1. OTP قبلی از قبل باطل شده بود.
+2. OTP جدیدی که هرگز به کاربر نرسیده بود در DB باقی می‌ماند.
+3. همان رکورد می‌توانست cooldown/rate limit را فعال کند.
 
-#### `app/Services/AuthService.php`
-ترتیب به این شکل تغییر کرد:
+### اصلاح
+ترتیب جدید:
 
-`generate → send SMS → invalidate old → persist new`
+`generate → send SMS → invalidate previous → persist new OTP`
 
-#### `app/Services/KavenegarService.php`
-`type=sms` به Verify Lookup اضافه شد.
+فقط OTPای که send آن موفق بوده وارد چرخه Verify می‌شود.
 
-### Verification Model
-OTP plaintext در DB ذخیره نمی‌شود. `code_hash` با HMAC-SHA256 ذخیره می‌شود و verify با `hash_equals()` انجام می‌شود.
+### Kavenegar
+در `KavenegarService` پارامتر `type=sms` به Verify Lookup اضافه شد تا channel به‌صورت صریح SMS باشد.
+
+### Server-side verification
+OTP خام در DB ذخیره نمی‌شود. `code_hash` با HMAC-SHA256 نگهداری و با `hash_equals()` مقایسه می‌شود. این همان نیاز «سمت سرور باید بتواند کد را بررسی کند» را بدون نگهداری plaintext برآورده می‌کند.
 
 ### Configuration
+
 - `KAVENEGAR_API_KEY`
 - `KAVENEGAR_OTP_TEMPLATE`
+- `OTP_PEPPER`
 
 ### Validation
-- Schema واقعی OTP بررسی شد.
-- UI و endpointها بررسی شدند.
-- Kavenegar Verify Lookup با مستندات فعلی تطبیق داده شد.
-- منطق اصلاح‌شده AuthService با `php -l` بدون خطای Syntax بود.
-- تست SMS واقعی به credential محیط اجرا وابسته است.
-
-### نتیجه
-Workflow کد آماده است؛ End-to-End SMS بعد از تنظیم credential واقعی باید Validation شود.
+Schema واقعی `otp_verifications`، endpointها و UI بررسی شدند. تست SMS واقعی به API Key و Template واقعی محیط اجرا وابسته است و در این مرحله ادعا نشده است.
 
 ---
 
-## MCC-CHANGE-005 — رفع آلودگی JSON در endpoint هوش مصنوعی ناشی از session_start تکراری
+## MCC-CHANGE-005 — حذف session_start تکراری از AI JSON endpoint
 
 ### تاریخ
 2026-10-15
 
-### درخواست / مسئله
-در درخواست اولیه گفته شده بود اولین درخواست AI گاهی/در شروع کار نمی‌کند و باید Root Cause بررسی شود.
+### مسئله
+کاربر گزارش کرده بود اولین درخواست AI کار نمی‌کند.
 
-### بررسی
-`config/config.php` در ابتدای هر Request اگر session فعال نباشد `session_start()` را اجرا می‌کند. با این حال `public/ai-qa-ask.php` بعد از require کردن همین config دوباره `session_start()` اجرا می‌کرد.
+### Root Cause واقعی پیدا شده
+`config/config.php` از قبل Session را start می‌کند. با این حال `public/ai-qa-ask.php` دوباره `session_start()` اجرا می‌کرد.
 
-در PHP، فراخوانی `session_start()` روی session فعال Notice تولید می‌کند. اگر `display_errors` در محیط روشن باشد، این Notice می‌تواند قبل از JSON در Response چاپ شود. Frontend از `res.json()` استفاده می‌کند؛ در نتیجه Response آلوده به Notice دیگر JSON معتبر نیست و مسیر `.catch()` اجرا می‌شود.
-
-### Root Cause
-شروع دوباره session در JSON endpoint در حالی که session قبلاً در bootstrap پروژه شروع شده بود.
+در محیطی که `display_errors` روشن باشد، PHP می‌تواند Notice مربوط به session فعال را قبل از JSON چاپ کند. Frontend با `res.json()` پاسخ را parse می‌کند؛ بنابراین متن اضافی قبل از JSON می‌تواند درخواست را ظاهراً fail کند.
 
 ### تغییر
-در `public/ai-qa-ask.php` فراخوانی اضافی `session_start()` حذف شد. مدیریت session فقط در `config/config.php` باقی ماند.
-
-### Before → After
-**Before:** `config.php session_start → ai-qa-ask.php session_start دوباره → احتمال Notice قبل از JSON`
-
-**After:** `config.php session_start → ai-qa-ask.php استفاده مستقیم از session موجود`
+`session_start()` اضافی از `ai-qa-ask.php` حذف شد و Bootstrap مرکزی تنها محل start session باقی ماند.
 
 ### Validation
-- رفتار PHP در محیط local با دو بار `session_start()` تست شد و Notice `Ignoring session_start() because a session is already active` بازتولید شد.
-- نسخه endpoint از `main` بازخوانی و حذف فراخوانی دوم تأیید شد.
-- تست Browser/Server واقعی هنوز انجام نشده، بنابراین ادعا نمی‌شود این تنها علت همه حالت‌های «اولین درخواست» بوده است؛ اما این defect قطعی از مسیر JSON حذف شد.
+رفتار duplicate `session_start()` در PHP بازتولید شد و Notice مربوط به session فعال مشاهده شد. Endpoint نهایی از `main` بازخوانی شد.
 
-### نتیجه
-یک Root Cause واقعی که می‌توانست Response اولین/درخواست‌های AI را در محیط‌های نمایش‌دهنده Notice خراب کند حذف شد.
+### محدودیت
+بدون اجرای Browser/Server واقعی ادعا نمی‌شود این تنها علت تمام موارد «اولین درخواست» بوده است؛ اما یک defect قطعی از مسیر JSON حذف شد.
 
 ---
 
-## MCC-CHANGE-006 — ذخیره سؤال و پاسخ AI در دیتابیس
+## MCC-CHANGE-006 — ذخیره پایدار AI Conversation و Message در دیتابیس
 
 ### تاریخ
 2026-10-15
 
-### درخواست / مسئله
-در درخواست اولیه خواسته شده بود سؤال‌های AI و تعاملات گفتگو در DB ذخیره شوند تا بعداً برای history و personalization قابل استفاده باشند.
+### مسئله
+قبل از این Change، history فقط در `$_SESSION['ai_chat_history']` بود و هیچ جدول persistent برای سؤال/پاسخ AI در Dump واقعی وجود نداشت.
 
-### وضعیت قبل
-AI history فقط در `$_SESSION['ai_chat_history']` بود. با پایان session یا تغییر مرورگر، تاریخچه پایدار در DB وجود نداشت. Dump واقعی نیز جدول `ai_conversations` یا `ai_messages` نداشت.
-
-### هدف
-ذخیره پایدار گفتگو بدون تغییر دادن Dump تاریخی موجود و بدون مخلوط‌کردن Persistence با LLM/Retrieval logic.
-
-### تغییرات دیتابیس
-فایل جدید:
+### Migration جدید
 
 `database/migrations/20261015_001_create_ai_conversations.sql`
 
-دو جدول ایجاد می‌کند:
+### جدول `ai_conversations`
 
-#### `ai_conversations`
 - `id`
 - `user_id` nullable
 - `session_key` unique
 - `created_at`
 - `updated_at`
 
-`user_id` به `users.id` متصل است. nullable بودن اجازه می‌دهد کاربر مهمان هم گفتگو داشته باشد.
+`user_id` به `users.id` وصل است. nullable بودن باعث می‌شود مهمان نیز conversation داشته باشد.
 
-#### `ai_messages`
+### جدول `ai_messages`
+
 - `id`
 - `conversation_id`
-- `role` (`user` / `assistant`)
+- `role` = user / assistant
 - `content`
 - `model`
 - `created_at`
 
-### فایل جدید
+### Repository جدید
+
 `app/Repositories/AiConversationRepository.php`
 
-مسئول Data Access است:
+متدها:
+
 - `getOrCreateConversation()`
 - `addMessage()`
 
-اگر conversation در حالت مهمان ایجاد شده باشد و کاربر بعداً در همان session Login کند، Repository در مراجعه بعدی `user_id` را به همان conversation متصل می‌کند.
+اگر conversation در حالت guest ساخته شده و همان session بعداً Login شود، `user_id` به conversation موجود متصل می‌شود.
 
 ### Endpoint
-`public/ai-qa-ask.php` اکنون:
+`public/ai-qa-ask.php` اکنون سؤال user و پاسخ assistant را در DB ذخیره می‌کند و history session را نیز برای Context کوتاه‌مدت حفظ می‌کند.
 
-1. conversation را با `session_id()` پیدا/ایجاد می‌کند.
-2. سؤال کاربر را قبل از ارسال به LLM ذخیره می‌کند.
-3. پاسخ assistant را همراه نام model ذخیره می‌کند.
-4. history session قبلی را همچنان برای context کوتاه‌مدت حفظ می‌کند.
-
-### رفتار در صورت Migration اعمال‌نشده
-Repository خطای DB را log و `null` برمی‌گرداند؛ در نتیجه AI response به‌خاطر نبود جدول جدید قطع نمی‌شود. پس از اعمال migration، persistence فعال می‌شود.
-
-### چرا دو جدول؟
-Conversation هویت یک رشته گفتگو را نگه می‌دارد و Message هر turn را. این ساختار برای درخواست صریح history/personalization لازم است و از ذخیره سؤال و پاسخ در یک فیلد تخت جلوگیری می‌کند.
+### رفتار Fail-safe
+اگر Migration هنوز روی محیطی اجرا نشده باشد، خطای DB log می‌شود ولی پاسخ AI متوقف نمی‌شود.
 
 ### Validation
-1. Schema جدید با MariaDB 10.4 و نوع `users.id` (`int unsigned`) تطبیق داده شد.
-2. Foreign Key و Indexهای موردنیاز در migration تعریف شدند.
-3. `AiConversationRepository.php` با `php -l` بدون خطای Syntax بود.
-4. نسخه endpoint متصل به Repository با `php -l` بدون خطای Syntax بود.
-5. Migration روی دیتابیس واقعی اجرا نشده، چون اتصال مستقیم به DB محیط پروژه در این گفتگو موجود نیست؛ بنابراین ایجاد فیزیکی جدول‌ها هنوز باید روی محیط اجرا انجام شود.
-
-### Rollback
-در صورت Rollback ابتدا `ai_messages` و سپس `ai_conversations` حذف می‌شوند و endpoint به نسخه بدون Persistence برمی‌گردد.
-
-### نتیجه
-کد و migration لازم برای ذخیره پایدار سؤال/پاسخ AI آماده است؛ فعال‌شدن واقعی آن نیازمند اجرای migration روی MariaDB پروژه است.
+Schema migration با MariaDB 10.4 و نوع `users.id` تطبیق داده شد. Syntax Repository و endpoint بررسی شد. Migration روی دیتابیس واقعی پروژه هنوز از این محیط اجرا نشده است.
 
 ---
 
-## قواعد ادامه کار
+## MCC-CHANGE-007 — تکمیل Child RAG، Domain Detection و هماهنگ‌سازی LLM Prompt
 
-1. Feature بعدی فقط از Roadmap Scope-locked انتخاب می‌شود.
-2. قبل از هر تغییر، وضعیت واقعی کد و دیتابیس بررسی می‌شود.
-3. تغییرات کوچک و قابل Validation نگه داشته می‌شوند.
-4. هر Change با دلیل، Before/After و محدودیت Validation در همین سند ثبت می‌شود.
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+در درخواست اولیه علاوه بر Pregnancy، بخش کودک/نوزاد و اتصال آن به RAG خواسته شده بود. Dump واقعی نشان داد چند جدول کودک وجود دارند اما Retriever فقط `development_milestones` و `growth_standards` را استفاده می‌کرد.
+
+### منابع واقعی اضافه‌شده به RAG
+
+چهار جدول موجود دیتابیس به Retrieval اضافه شدند:
+
+1. `child_nutrition`
+2. `child_supplements`
+3. `common_conditions`
+4. `vaccination_schedule`
+
+این جداول قبلاً داده داشتند ولی AI از آن‌ها استفاده نمی‌کرد.
+
+### تغییر در Repository
+`AiKnowledgeRepository` فقط Data Access جدید اضافه کرد:
+
+- `findChildNutritionByAge()`
+- `findChildNutritionByKeywords()`
+- `findChildSupplementsByAge()`
+- `findChildSupplementsByKeywords()`
+- `findCommonConditions()`
+- `findVaccinationsByAge()`
+- `findVaccinationsByKeywords()`
+
+تفکیک Phase 1 حفظ شد؛ formatting و ranking وارد Repository نشد.
+
+### Age-aware Retrieval
+اگر سؤال سن کودک را مشخص کند، برای nutrition/supplement/vaccination/milestone ابتدا Query سن‌محور اجرا می‌شود. اگر سن وجود نداشته باشد، keyword search fallback است.
+
+### اصلاح Native PDO Placeholder
+`Database.php` مقدار زیر را دارد:
+
+`PDO::ATTR_EMULATE_PREPARES => false`
+
+در native prepared statements نباید یک named placeholder چند بار reuse شود. چند Query سن‌محور مثل این الگو داشتند:
+
+`age_start <= :age AND age_end >= :age`
+
+این ساختار به placeholderهای مستقل تبدیل شد، مانند:
+
+`age_start <= :age_start AND age_end >= :age_end`
+
+همین اصلاح برای nutrition، child supplements، vaccination و milestones اعمال شد.
+
+### Domain Detection
+بعد از اضافه‌شدن منابع کودک، سقف ۱۲ Context Block می‌توانست باعث شود منابع کودک برای سؤال بارداری بی‌جهت جای منابع مرتبط را بگیرند.
+
+به `QueryPreprocessor::analyze()` فیلد `domain` اضافه شد:
+
+- `pregnancy`
+- `child`
+- `general`
+
+Markerهای ساده و قابل توضیح برای بارداری و کودک استفاده می‌شوند؛ Vector/Classifer جدیدی اضافه نشد.
+
+### رفع ابهام سن
+عبارتی مثل «سه ماهه بارداری» قبلاً ممکن بود توسط age parser به «کودک ۳ ماهه» تعبیر شود. اکنون اگر Domain سؤال pregnancy باشد، `age_months` کودک تولید نمی‌شود.
+
+### Keyword/Synonym تکمیلی
+در حد نیاز همین Domain، synonymهای زیر اضافه/تکمیل شدند:
+
+- نوزاد ↔ شیرخوار
+- کودک ↔ بچه
+- واکسن ↔ واکسیناسیون
+- چند spelling رایج برای علائم موجود
+
+### Prioritization منابع
+
+- سؤال `child` → منابع کودک، سپس FAQ/Article
+- سؤال `pregnancy` → منابع بارداری، سپس FAQ/Article
+- سؤال `general` → FAQ/Article، سپس child و pregnancy
+
+سقف ۱۲ block حفظ شد.
+
+### LLM Prompt
+`LlmService` قبلاً خود را عمدتاً دستیار بارداری معرفی می‌کرد. Prompt با منابع واقعی RAG هماهنگ شد تا حوزه‌های زیر را نیز پوشش دهد:
+
+- نوزاد و کودک
+- رشد و تکامل
+- تغذیه کودک
+- واکسیناسیون
+- مکمل‌ها
+- بیماری‌های شایع کودک
+
+همچنین به مدل گفته شد منابع pregnancy و child را با هم مخلوط نکند و Context نامرتبط را وارد پاسخ نکند.
+
+### فایل‌های تغییرکرده
+
+- `app/Repositories/AiKnowledgeRepository.php`
+- `app/Services/KnowledgeRetriever.php`
+- `app/Services/QueryPreprocessor.php`
+- `app/Services/LlmService.php`
+
+### دیتابیس
+در این Change هیچ Schema جدیدی ساخته نشد؛ فقط از جدول‌هایی که از قبل در Dump واقعی وجود داشتند استفاده شد.
+
+### Validation
+
+- ستون‌های چهار جدول از Dump واقعی بررسی شدند و Queryها دقیقاً با همان Schema نوشته شدند.
+- native PDO placeholderهای تکراری شناسایی و به نام‌های مستقل تبدیل شدند.
+- مرز Repository/Service دوباره بررسی شد و Repository همچنان Data Access-only باقی مانده است.
+- تست End-to-End Query علیه MariaDB واقعی از این محیط قابل اجرا نیست؛ این محدودیت ثبت می‌شود و موفقیت runtime DB در این Change ادعا نمی‌شود.
+
+### نتیجه نهایی
+RAG اکنون علاوه بر Pregnancy به داده‌های واقعی کودک/نوزاد موجود در دیتابیس دسترسی دارد، Queryها بر اساس Domain اولویت‌بندی می‌شوند و Prompt مدل نیز با همین دامنه هماهنگ است.
+
+---
+
+## وضعیت ادامه کار
+
+بعد از MCC-CHANGE-007، بخش معماری و بخش مهمی از RAG اولیه انجام شده است. کارهای باقی‌مانده فقط طبق Roadmap Scope-locked ادامه پیدا می‌کنند؛ از جمله اجرای Migration در محیط واقعی، E2E credential tests و سپس فاز محتوای Infant/Child و Crawler.
