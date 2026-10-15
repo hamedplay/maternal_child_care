@@ -26,35 +26,69 @@ class KnowledgeRetriever
         $keywords = $analysis['keywords'];
         $ageMonths = $analysis['age_months'];
         $gender = $analysis['gender'];
+        $domain = $analysis['domain'];
 
         if (empty($keywords) && $ageMonths === null) {
             return [];
         }
 
-        $blocks = [];
+        $generalBlocks = $this->retrieveGeneralBlocks($keywords, $perTableLimit);
+        $childBlocks = $this->retrieveChildBlocks($keywords, $perTableLimit, $ageMonths, $gender);
+        $pregnancyBlocks = $this->retrievePregnancyBlocks($keywords, $perTableLimit);
 
-        if (!empty($keywords)) {
-            $blocks = array_merge($blocks, $this->retrieveFaqs($keywords, $perTableLimit));
-            $blocks = array_merge($blocks, $this->retrieveArticles($keywords, $perTableLimit));
-            $blocks = array_merge($blocks, $this->retrieveCommonConditions($keywords, $perTableLimit));
-        }
-
-        // منابع سن‌محور کودک؛ در صورت نبود سن از keyword fallback استفاده می‌کنند.
-        $blocks = array_merge($blocks, $this->retrieveChildNutrition($keywords, $perTableLimit, $ageMonths));
-        $blocks = array_merge($blocks, $this->retrieveChildSupplements($keywords, $perTableLimit, $ageMonths));
-        $blocks = array_merge($blocks, $this->retrieveVaccinations($keywords, $perTableLimit, $ageMonths));
-        $blocks = array_merge($blocks, $this->retrieveMilestones($keywords, $perTableLimit, $ageMonths));
-        $blocks = array_merge($blocks, $this->retrieveGrowth($ageMonths, $gender));
-
-        if (!empty($keywords)) {
-            $blocks = array_merge($blocks, $this->retrieveNutrition($keywords, $perTableLimit));
-            $blocks = array_merge($blocks, $this->retrieveWeeks($keywords, $perTableLimit));
-            $blocks = array_merge($blocks, $this->retrieveWarningSigns($keywords, $perTableLimit));
-            $blocks = array_merge($blocks, $this->retrieveExercises($keywords, $perTableLimit));
-            $blocks = array_merge($blocks, $this->retrieveSupplements($keywords, $perTableLimit));
+        if ($domain === 'child') {
+            $blocks = array_merge($childBlocks, $generalBlocks);
+        } elseif ($domain === 'pregnancy') {
+            $blocks = array_merge($pregnancyBlocks, $generalBlocks);
+        } else {
+            $blocks = array_merge($generalBlocks, $childBlocks, $pregnancyBlocks);
         }
 
         return array_slice($blocks, 0, 12);
+    }
+
+    private function retrieveGeneralBlocks(array $keywords, int $limit): array
+    {
+        if (empty($keywords)) {
+            return [];
+        }
+
+        return array_merge(
+            $this->retrieveFaqs($keywords, $limit),
+            $this->retrieveArticles($keywords, $limit)
+        );
+    }
+
+    private function retrieveChildBlocks(array $keywords, int $limit, ?int $ageMonths, ?string $gender): array
+    {
+        $blocks = [];
+
+        if (!empty($keywords)) {
+            $blocks = array_merge($blocks, $this->retrieveCommonConditions($keywords, $limit));
+        }
+
+        $blocks = array_merge($blocks, $this->retrieveChildNutrition($keywords, $limit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveChildSupplements($keywords, $limit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveVaccinations($keywords, $limit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveMilestones($keywords, $limit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveGrowth($ageMonths, $gender));
+
+        return $blocks;
+    }
+
+    private function retrievePregnancyBlocks(array $keywords, int $limit): array
+    {
+        if (empty($keywords)) {
+            return [];
+        }
+
+        return array_merge(
+            $this->retrieveNutrition($keywords, $limit),
+            $this->retrieveWeeks($keywords, $limit),
+            $this->retrieveWarningSigns($keywords, $limit),
+            $this->retrieveExercises($keywords, $limit),
+            $this->retrieveSupplements($keywords, $limit)
+        );
     }
 
     private function retrieveFaqs(array $keywords, int $limit): array
