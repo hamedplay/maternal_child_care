@@ -3,10 +3,7 @@
 namespace App\Services;
 
 /**
- * ارسال پیامک کد تایید از طریق سرویس «Verify Lookup» کاوه‌نگار.
- * این متد نسبت به پیامک تبلیغاتی سریع‌تر و ارزون‌تره، ولی نیاز داره از قبل
- * توی پنل کاوه‌نگار یه «Template» بسازید (بخش Verify Lookup > Templates)
- * که حداقل یک متغیر (مثلاً %token%) توش تعریف شده باشه.
+ * ارسال پیامک کد تایید از طریق سرویس Verify Lookup کاوه‌نگار.
  */
 class KavenegarService
 {
@@ -16,12 +13,12 @@ class KavenegarService
     public function __construct()
     {
         $config = require BASE_PATH . '/config/services.php';
-        $this->apiKey   = $config['kavenegar']['api_key'];
+        $this->apiKey = $config['kavenegar']['api_key'];
         $this->template = $config['kavenegar']['otp_template'];
     }
 
     /**
-     * آیا کلید واقعی کاوه‌نگار تنظیم شده؟ (برای تشخیص حالت توسعه/تست)
+     * آیا کلید واقعی کاوه‌نگار تنظیم شده؟
      */
     public function isConfigured(): bool
     {
@@ -30,8 +27,7 @@ class KavenegarService
 
     public function sendOtp(string $phone, string $code): bool
     {
-        // اگه کلید API هنوز تنظیم نشده (مثلاً موقع توسعه‌ی محلی)، پیامک واقعی نمی‌فرستیم
-        // و به‌جاش کد رو توی لاگ سرور می‌نویسیم تا بتونید تست کنید.
+        // حالت توسعه: اگر API Key تنظیم نشده باشد پیامک واقعی ارسال نمی‌شود.
         if ($this->apiKey === '') {
             error_log("[KavenegarService] DEV MODE (بدون API key) - کد {$phone}: {$code}");
             return true;
@@ -42,15 +38,16 @@ class KavenegarService
             $this->apiKey,
             http_build_query([
                 'receptor' => $phone,
-                'token'    => $code,
+                'token' => $code,
                 'template' => $this->template,
+                'type' => 'sms',
             ])
         );
 
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_TIMEOUT => 10,
             CURLOPT_SSL_VERIFYPEER => true,
         ]);
 
@@ -67,7 +64,6 @@ class KavenegarService
         $data = json_decode($response, true);
         $status = $data['return']['status'] ?? null;
 
-        // کاوه‌نگار در صورت موفقیت status=200 برمی‌گردونه
         if ($httpCode !== 200 || $status !== 200) {
             error_log('[KavenegarService] ارسال ناموفق: ' . $response);
             return false;
