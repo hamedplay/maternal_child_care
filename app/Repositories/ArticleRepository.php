@@ -32,7 +32,6 @@ class ArticleRepository
             $countStmt->execute($params);
             $total = (int) ($countStmt->fetch()['cnt'] ?? 0);
 
-            // LIMIT/OFFSET رو چون مستقیم عدد صحیح‌شده (int) هستن، امن می‌شه توی کوئری گذاشت
             $stmt = Database::connection()->prepare(
                 "SELECT * FROM articles {$where} ORDER BY created_at DESC LIMIT {$perPage} OFFSET {$offset}"
             );
@@ -77,5 +76,29 @@ class ArticleRepository
         } catch (PDOException $e) {
             return [];
         }
+    }
+
+    /**
+     * داده خام لازم برای ابزار پاک‌سازی Article HTML.
+     * @return array<int,array{id:int,title:string,content:string}>
+     */
+    public function allForContentCleanup(): array
+    {
+        try {
+            return Database::connection()->query(
+                'SELECT id, title, content FROM articles ORDER BY id'
+            )->fetchAll();
+        } catch (PDOException $e) {
+            error_log('ArticleRepository::allForContentCleanup خطا: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function updateContent(int $id, string $content): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE articles SET content = :content, updated_at = CURRENT_TIMESTAMP WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id, 'content' => $content]);
     }
 }
