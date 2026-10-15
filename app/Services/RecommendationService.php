@@ -26,9 +26,7 @@ class RecommendationService
         $this->faqRepository = new FaqRepository();
     }
 
-    /**
-     * @return array{articles:array,faqs:array,quick_links:array,reason:string}
-     */
+    /** @return array{articles:array,faqs:array,quick_links:array,reason:string} */
     public function forUser(int $userId): array
     {
         $profile = $this->profileRepository->findByUserId($userId) ?? [];
@@ -161,11 +159,15 @@ class RecommendationService
         try {
             $due = new \DateTimeImmutable($dueDate);
             $today = new \DateTimeImmutable('today');
-            $conceptionReference = $due->modify('-280 days');
-            $days = (int) $conceptionReference->diff($today)->format('%r%a');
-            $week = intdiv(max(0, $days), 7) + 1;
+            $pregnancyStart = $due->modify('-280 days');
+            $days = (int) $pregnancyStart->diff($today)->format('%r%a');
 
-            return ($week >= 1 && $week <= 40) ? $week : null;
+            // Due date باید با یک بارداری جاری سازگار باشد؛ تاریخ خیلی دور/گذشته Quick Link جعلی تولید نکند.
+            if ($days < 0 || $days > 279) {
+                return null;
+            }
+
+            return min(40, intdiv($days, 7) + 1);
         } catch (\Throwable $e) {
             return null;
         }
