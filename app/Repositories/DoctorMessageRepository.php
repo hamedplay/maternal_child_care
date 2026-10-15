@@ -28,7 +28,7 @@ class DoctorMessageRepository
 
         try {
             $stmt = Database::connection()->prepare(
-                'SELECT id, subject, message, status, created_at, updated_at
+                'SELECT id, subject, message, status, reply_text, replied_at, created_at, updated_at
                  FROM doctor_messages
                  WHERE user_id = :user_id
                  ORDER BY id DESC
