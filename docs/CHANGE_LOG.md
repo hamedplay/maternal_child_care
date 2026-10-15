@@ -2,432 +2,258 @@
 
 این سند مرجع اصلی ثبت تغییراتی است که از این تاریخ به بعد روی سامانه `maternal_child_care` انجام می‌شود.
 
-هدف فقط ثبت یک Changelog کوتاه نیست؛ هر تغییر باید به شکلی نوشته شود که یک توسعه‌دهنده یا مدیر فنی بتواند بعداً بفهمد:
+هدف فقط ثبت یک Changelog کوتاه نیست؛ هر تغییر باید به شکلی نوشته شود که بعداً مشخص باشد مسئله چه بوده، ساختار قبل چگونه کار می‌کرده، چرا تغییر انجام شده، چه فایل‌هایی تغییر کرده‌اند، چگونه پیاده‌سازی شده و نتیجه چگونه Validation شده است.
 
-- مسئله چه بوده است.
-- قبل از تغییر، سامانه چگونه کار می‌کرده است.
-- چرا تصمیم گرفته‌ایم این قسمت را تغییر دهیم.
-- دقیقاً چه فایل‌ها، کلاس‌ها، توابع، ساختارها یا تنظیماتی تغییر کرده‌اند.
-- ساختار قبلی به چه ساختاری تبدیل شده است.
-- تغییر چگونه پیاده‌سازی شده است.
-- چه وابستگی‌ها، ریسک‌ها یا اثرات جانبی دارد.
-- چگونه صحت تغییر بررسی و تست شده است.
-- در صورت نیاز چگونه می‌توان تغییر را بازگرداند یا عیب‌یابی کرد.
+> اصل اجرایی: Inspect → Requirement / Root Cause → Design → Implement → Validate → Document
 
 ---
 
-## 1. قانون اصلی مستندسازی
-
-هر تغییر فنی که روی پروژه انجام می‌شود، باید در همین فایل ثبت شود؛ از جمله:
-
-- تغییر رابط کاربری (UI/UX)
-- تغییر CSS و JavaScript
-- تغییر صفحات PHP
-- اضافه یا حذف کردن قابلیت
-- تغییر Business Logic
-- ایجاد یا تغییر Class / Service / Repository / Controller / Model
-- تغییر تنظیمات پروژه
-- تغییر مسیرها و ساختار فایل‌ها
-- تغییر وابستگی‌های Composer
-- تغییرات امنیتی
-- تغییرات مرتبط با دیتابیس در صورت اضافه شدن دیتابیس به پروژه
-- رفع Bug
-- Refactor
-- Performance Optimization
-- تغییرات Deployment یا Hosting
-
-تغییرات صرفاً ظاهری کوچک نیز در صورتی که روی رفتار یا نگهداری سامانه اثر داشته باشند ثبت می‌شوند.
-
----
-
-## 2. روش انجام تغییرات
-
-برای هر درخواست، فرآیند زیر دنبال می‌شود:
-
-### مرحله 1 — بررسی وضعیت فعلی (Inspect)
-
-ابتدا فایل‌ها و ساختار مرتبط با درخواست بررسی می‌شوند. در این مرحله نباید بر اساس حدس تغییر ایجاد شود.
-
-هدف این است که مشخص شود:
-
-- قابلیت فعلی کجا پیاده‌سازی شده است.
-- چه فایل‌هایی به آن وابسته‌اند.
-- داده از کجا می‌آید.
-- چه کدهایی روی رفتار موردنظر اثر دارند.
-- آیا تغییر موردنظر می‌تواند روی بخش دیگری اثر جانبی بگذارد یا خیر.
-
-### مرحله 2 — مشخص کردن مسئله (Problem / Root Cause)
-
-قبل از تغییر، مسئله یا نیاز به زبان ساده توضیح داده می‌شود.
-
-در Bug Fix فقط علامت ظاهری مشکل اصلاح نمی‌شود؛ تا حد امکان علت اصلی مشکل مشخص می‌شود.
-
-### مرحله 3 — طراحی راه‌حل (Solution Design)
-
-قبل از پیاده‌سازی مشخص می‌شود:
-
-- چه چیزی باید تغییر کند.
-- چه چیزی نباید تغییر کند.
-- حداقل تغییر لازم چیست.
-- آیا ساختار فعلی قابل استفاده است یا نیاز به Refactor دارد.
-
-### مرحله 4 — پیاده‌سازی (Implementation)
-
-تغییر فقط در محدوده‌ی موردنیاز انجام می‌شود و از تغییرات جانبی بدون ضرورت خودداری می‌شود.
-
-### مرحله 5 — اعتبارسنجی (Validation)
-
-بعد از تغییر، نتیجه با روش مناسب بررسی می‌شود؛ برای مثال:
-
-- بررسی Syntax
-- اجرای Build یا Test در صورت وجود
-- بررسی خروجی واقعی صفحه
-- بررسی رفتار JavaScript
-- بررسی درخواست HTTP
-- بررسی داده یا Query
-- بررسی Error Log
-
-نوع Validation برای هر تغییر جداگانه در همین سند ثبت خواهد شد.
-
-### مرحله 6 — ثبت نتیجه (Documentation)
-
-پس از پیاده‌سازی، جزئیات کامل تغییر در بخش «گزارش تغییرات» این فایل اضافه می‌شود.
-
----
-
-## 3. قالب استاندارد هر تغییر
-
-هر تغییر جدید با قالب زیر ثبت می‌شود:
-
-### Change ID
-
-شناسه یکتا برای ارجاع به تغییر.
-
-نمونه:
-
-`MCC-CHANGE-001`
-
-### تاریخ
-
-تاریخ انجام تغییر.
-
-### عنوان
-
-نام کوتاه و واضح تغییر.
-
-### درخواست / مسئله
-
-توضیح نیاز یا مشکلی که باعث ایجاد تغییر شد.
-
-### وضعیت قبل از تغییر
-
-توضیح رفتار، ساختار یا کد قبلی.
-
-### هدف
-
-توضیح نتیجه‌ای که انتظار داریم بعد از تغییر ایجاد شود.
-
-### Root Cause
-
-اگر تغییر مربوط به Bug باشد، علت اصلی مشکل در این قسمت نوشته می‌شود.
-
-اگر تغییر Feature باشد، این قسمت می‌تواند با عبارت `Not Applicable` مشخص شود.
-
-### تصمیم فنی
-
-توضیح اینکه چرا این راه‌حل انتخاب شد و چرا گزینه‌های دیگر انتخاب نشدند، در صورتی که گزینه‌های معنادار دیگری وجود داشته باشند.
-
-### فایل‌های تغییرکرده
-
-تمام فایل‌های اضافه، حذف یا ویرایش‌شده با توضیح نقش هرکدام ثبت می‌شوند.
-
-### Before → After
-
-به زبان آموزشی توضیح داده می‌شود که ساختار یا رفتار قبلی به چه چیزی تبدیل شده است.
-
-### جزئیات پیاده‌سازی
-
-توضیح مرحله‌به‌مرحله‌ی کاری که انجام شده است.
-
-### اثر روی بخش‌های دیگر
-
-مشخص می‌شود آیا تغییر روی بخش‌های دیگر سامانه اثر دارد یا خیر.
-
-### ملاحظات امنیتی
-
-در صورت وجود اثر امنیتی، توضیح داده می‌شود.
-
-### ملاحظات Performance
-
-در صورت وجود اثر Performance، توضیح داده می‌شود.
-
-### Validation / Test
-
-تمام تست‌ها و بررسی‌های واقعی انجام‌شده همراه نتیجه ثبت می‌شوند.
-
-### Rollback
-
-در صورت نیاز توضیح داده می‌شود چگونه می‌توان این تغییر را بازگرداند.
-
-### نتیجه نهایی
-
-خلاصه وضعیت بعد از پایان کار.
+## قواعد مستندسازی
+
+1. هیچ تغییر برنامه‌ریزی‌شده‌ای بدون ثبت در این سند نهایی نمی‌شود.
+2. تغییر فقط در Scope درخواست کاربر انجام می‌شود.
+3. در Bug Fix، Symptom و Root Cause از هم جدا نوشته می‌شوند.
+4. نتیجه تست واقعی با نتیجه مورد انتظار اشتباه گرفته نمی‌شود.
+5. اگر Validation کامل ممکن نباشد، محدودیت آن صریح نوشته می‌شود.
+6. نام فایل‌ها و Componentهای تغییرکرده صریحاً ذکر می‌شوند.
+7. تغییرات دیتابیس فقط در صورت نیاز همان Feature انجام می‌شوند.
 
 ---
 
 # گزارش تغییرات
 
----
-
 ## MCC-CHANGE-000 — ایجاد سیستم مستندسازی تغییرات
 
 ### تاریخ
-
 2026-10-15
 
-### عنوان
-
-ایجاد مستند مرکزی برای ثبت آموزشی و فنی تمام تغییرات پروژه.
-
 ### درخواست / مسئله
+پیش از شروع توسعه لازم بود یک مرجع دائمی برای ثبت دلیل، روش اجرا، Before/After، Validation و Rollback تمام تغییرات ایجاد شود.
 
-پیش از شروع تغییرات جدید روی سامانه لازم است یک مرجع دائمی وجود داشته باشد تا تمام تغییرات آینده همراه دلیل، روش اجرا و نتیجه‌ی آن‌ها ثبت شوند.
-
-بدون چنین سندی، بعد از چند مرحله توسعه مشخص کردن اینکه یک بخش چرا تغییر کرده، چه تصمیمی پشت آن بوده و چه فایل‌هایی تحت تأثیر قرار گرفته‌اند دشوار می‌شود.
-
-### وضعیت قبل از تغییر
-
-مخزن دارای `README.md` برای توضیح ساختار کلی پروژه است، اما سند اختصاصی برای ثبت تاریخچه و منطق تغییرات توسعه‌ای وجود نداشت.
-
-### هدف
-
-ایجاد یک مرجع فنی دائمی که هم نقش Change Log را داشته باشد و هم به شکل آموزشی منطق پشت هر تغییر را توضیح دهد.
-
-### Root Cause
-
-Not Applicable — این تغییر مربوط به ایجاد فرآیند توسعه و مستندسازی است و Bug Fix نیست.
+### وضعیت قبل
+پروژه README داشت، اما سند اختصاصی تاریخچه و منطق تغییرات توسعه‌ای نداشت.
 
 ### تصمیم فنی
+فایل مستقل `docs/CHANGE_LOG.md` ایجاد شد تا README روی معرفی پروژه باقی بماند و مستند تغییرات بتواند جزئیات فنی بیشتری نگهداری کند.
 
-به‌جای اضافه کردن تاریخچه تغییرات به `README.md`، فایل مستقلی در مسیر `docs/CHANGE_LOG.md` ایجاد شد.
-
-دلیل این تصمیم این است که:
-
-1. README باید روی معرفی پروژه، ساختار و راه‌اندازی متمرکز بماند.
-2. تاریخچه تغییرات در طول زمان می‌تواند بسیار بزرگ شود.
-3. قرار گرفتن مستندات توسعه در پوشه‌ی `docs/` ساختار پروژه را تمیزتر و قابل توسعه‌تر می‌کند.
-4. این فایل می‌تواند بدون شلوغ کردن مستند اصلی پروژه، جزئیات فنی زیادی نگهداری کند.
-
-### فایل‌های تغییرکرده
-
-#### Added
-
-`docs/CHANGE_LOG.md`
-
-نقش فایل: مرجع اصلی مستندسازی تمام تغییرات فنی بعدی پروژه.
-
-### Before → After
-
-**Before**
-
-پروژه فقط دارای مستند ساختار کلی در `README.md` بود.
-
-**After**
-
-پروژه اکنون دو سطح مستندات دارد:
-
-- `README.md` → معرفی و ساختار کلی پروژه
-- `docs/CHANGE_LOG.md` → تاریخچه، منطق، نحوه اجرا و Validation تغییرات
-
-### جزئیات پیاده‌سازی
-
-1. ساختار فعلی Repository بررسی شد.
-2. وجود یا عدم وجود پوشه‌ی مستندات بررسی شد.
-3. مشخص شد در Root پروژه فایل README وجود دارد اما پوشه `docs/` وجود ندارد.
-4. مسیر `docs/CHANGE_LOG.md` برای مستند مرکزی انتخاب شد.
-5. قالب ثابت برای Change ID، Root Cause، Before/After، Validation و Rollback تعریف شد.
-6. این تغییر به عنوان `MCC-CHANGE-000` ثبت شد تا خود فرآیند مستندسازی نیز بدون سابقه باقی نماند.
-
-### اثر روی بخش‌های دیگر
-
-این تغییر هیچ اثری روی Runtime، UI، PHP، JavaScript یا رفتار سایت ندارد.
-
-### ملاحظات امنیتی
-
-هیچ اثر امنیتی مستقیم ندارد.
-
-با این حال، تغییرات امنیتی آینده نیز باید همراه دلیل و روش Validation در همین فایل مستند شوند.
-
-### ملاحظات Performance
-
-هیچ اثری روی Performance سامانه ندارد.
-
-### Validation / Test
-
-Validation این مرحله شامل بررسی ایجاد شدن فایل در Branch اصلی Repository و قابل خواندن بودن محتوای Markdown است.
-
-### Rollback
-
-در صورت نیاز، حذف فایل `docs/CHANGE_LOG.md` تمام اثر این تغییر را بازمی‌گرداند؛ زیرا هیچ کد Runtime تغییر نکرده است.
-
-### نتیجه نهایی
-
-از این مرحله به بعد، هیچ تغییر فنی برنامه‌ریزی‌شده‌ای نباید بدون ثبت توضیحات آن در این سند نهایی شود.
+### نتیجه
+از این Change به بعد، تغییرات توسعه‌ای باید در همین سند ثبت شوند.
 
 ---
 
 ## MCC-CHANGE-001 — اصلاح Roadmap و قفل کردن Scope روی درخواست اولیه
 
 ### تاریخ
-
 2026-10-15
 
 ### درخواست / مسئله
+کاربر تصریح کرد هیچ Feature یا Refactor خارج از درخواست اولیه انجام نشود. Roadmap اولیه چند فعالیت عمومی مثل Audit گسترده و Hardening مستقل را به‌عنوان فاز اجرایی آورده بود که مستقیماً جزء نیازهای کاربر نبودند.
 
-کاربر تصریح کرد که هیچ تغییر یا Feature خارج از درخواست اولیه نباید انجام شود. Roadmap اولیه علاوه بر نیازهای کاربر، چند فعالیت عمومی مثل Audit گسترده، Hardening مستقل و برخی استانداردسازی‌های عمومی را به عنوان فاز مستقل در نظر گرفته بود.
-
-### وضعیت قبل از تغییر
-
-`docs/IMPLEMENTATION_ROADMAP.md` دارای Phase 0 عمومی برای Audit/Security/Baseline و برخی کارهای جانبی بود که الزام مستقیم درخواست اولیه نبودند.
+### وضعیت قبل
+`docs/IMPLEMENTATION_ROADMAP.md` شامل Phase عمومی Audit/Security/Baseline و چند کار جانبی بود.
 
 ### هدف
-
-تبدیل Roadmap به نقشه اجرای دقیق همان نیازهای اعلام‌شده توسط کاربر و جلوگیری از Scope Creep.
-
-### Root Cause
-
-Not Applicable — این تغییر اصلاح برنامه اجرا بر اساس Scope نهایی کاربر است.
-
-### تصمیم فنی
-
-فازهای عمومی حذف شدند و نقشه راه بر اساس Featureهای صریح کاربر بازچینی شد: AI/RAG و جداسازی Data Access، OTP/Kavenegar، محتوای Infant/Child و Crawler/پاک‌سازی گهواره، Profile/Personalization، Doctor Contact/Reminder و Admin Panel.
-
-### فایل‌های تغییرکرده
-
-- `docs/IMPLEMENTATION_ROADMAP.md`
+Roadmap فقط شامل همان قابلیت‌هایی باشد که کاربر در درخواست اولیه خواسته است.
 
 ### Before → After
+**Before:** فازهای عمومی و فعالیت‌های جانبی نیز جزو برنامه بودند.
 
-**Before:** Roadmap شامل فعالیت‌های عمومی خارج از Featureهای اولیه نیز بود.
+**After:** Roadmap فقط روی AI/RAG و جداسازی Data Access، OTP/Kavenegar، محتوای نوزاد/کودک و Crawler، حذف تبلیغات گهواره، Profile/Personalization، Doctor Contact/Reminder و Admin Panel متمرکز شد.
 
-**After:** هر فاز مستقیماً به یکی از نیازهای اولیه کاربر متصل است و در سند صراحتاً نوشته شده Refactor یا Feature جانبی بدون ارتباط مستقیم انجام نشود.
+### Validation
+Roadmap بعد از Update از `main` بازخوانی و با درخواست اولیه و Dump واقعی دیتابیس تطبیق داده شد.
 
-### Validation / Test
-
-محتوای Roadmap بعد از Update از شاخه `main` بازخوانی و Scopeهای جدید با درخواست اولیه و Dump واقعی دیتابیس تطبیق داده شد.
-
-### Rollback
-
-بازگرداندن Commit مربوط به Roadmap نسخه قبلی را برمی‌گرداند و اثری روی Runtime ندارد.
-
-### نتیجه نهایی
-
-Roadmap اکنون Scope-locked است و مبنای ادامه توسعه فقط نیازهای اولیه کاربر است.
+### نتیجه
+Scope توسعه قفل شد و هر تغییر باید مستقیماً به یکی از نیازهای اولیه کاربر متصل باشد.
 
 ---
 
-## MCC-CHANGE-002 — شروع فاز 1: ایجاد مرز Query Preprocessing و Knowledge Retrieval
+## MCC-CHANGE-002 — شروع فاز ۱: ایجاد مرز Query Preprocessing و Knowledge Retrieval
 
 ### تاریخ
-
 2026-10-15
 
 ### درخواست / مسئله
+در درخواست اولیه، جداسازی منطق AI از دسترسی دیتابیس، تغییر Keyword Processing و ایجاد Retriever مستقل خواسته شده بود.
 
-در درخواست اولیه، جداسازی دسترسی دیتابیس از منطق AI، تغییر بخش Keyword Processing و ایجاد Retriever مستقل خواسته شده بود. در ساختار قبلی endpoint مستقیماً `AiKnowledgeRepository` را صدا می‌زد و Repository همزمان preprocessing و retrieval/SQL را انجام می‌داد.
-
-### وضعیت قبل از تغییر
-
-مسیر قبلی:
+### وضعیت قبل
+مسیر درخواست AI چنین بود:
 
 `public/ai-qa-ask.php → AiKnowledgeRepository::search(question) → LlmService`
 
-`AiKnowledgeRepository` علاوه بر queryهای دیتابیس، normalize/keyword/age/gender extraction، scoring و context formatting را نیز انجام می‌دهد.
+`AiKnowledgeRepository` علاوه بر SQL، normalize، keyword extraction، تشخیص سن/جنسیت، scoring و context formatting را نیز انجام می‌داد.
 
 ### هدف
+ایجاد اولین boundary بدون بازنویسی یک‌باره و پرریسک کل Retrieval.
 
-شروع جداسازی به صورت مرحله‌ای و بدون تغییر رفتار فعلی Retrieval. در اولین گام باید endpoint از Repository مستقل شود و یک مرز اختصاصی Retriever و Preprocessor به وجود بیاید.
+### فایل‌های تغییرکرده
+- Added: `app/Services/QueryPreprocessor.php`
+- Added: `app/Services/KnowledgeRetriever.php`
+- Updated: `public/ai-qa-ask.php`
 
-### Root Cause
+### Before → After
+**Before:**
+`Endpoint → AiKnowledgeRepository → LlmService`
 
-Not Applicable — این تغییر Refactor مستقیم مورد درخواست کاربر است.
+**After:**
+`Endpoint → KnowledgeRetriever → QueryPreprocessor → AiKnowledgeRepository → LlmService`
+
+### جزئیات اجرا
+- نرمال‌سازی `ي/ى/ك` به حروف فارسی.
+- تبدیل اعداد فارسی/عربی به لاتین.
+- تبدیل نیم‌فاصله به فاصله و یکدست‌سازی whitespace.
+- حذف وابستگی مستقیم endpoint به Repository.
+
+### Validation
+- PSR-4 و fallback autoloader پروژه بررسی شد.
+- فایل‌های جدید از `main` بازخوانی شدند.
+- endpoint بعد از Update از `KnowledgeRetriever` استفاده می‌کند.
+
+### نتیجه
+مرز اولیه Retrieval ایجاد شد، اما در این Change هنوز منطق keyword/scoring داخل Repository باقی مانده بود و برای گام بعدی برنامه‌ریزی شد.
+
+---
+
+## MCC-CHANGE-003 — تکمیل فاز ۱: جداسازی کامل AI Logic از Data Access
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+کاربر صریحاً خواسته بود Repository مربوط به AI همزمان Business Logic و Database Access را نگهداری نکند. بعد از MCC-CHANGE-002 هنوز بخش مهمی از منطق در `AiKnowledgeRepository` باقی مانده بود.
+
+### وضعیت قبل از تغییر
+`AiKnowledgeRepository` مسئول این موارد بود:
+
+- استخراج keyword
+- stopword filtering
+- light stemming
+- synonym expansion
+- تشخیص سن کودک
+- تشخیص جنسیت
+- scoring/ranking
+- تبدیل HTML مقاله به متن
+- انتخاب snippet مرتبط
+- ساخت context block
+- اجرای SQL روی جداول مختلف
+
+در نتیجه Repository هم Data Access بود و هم Retrieval/Business Logic.
+
+### هدف
+Repository فقط Query اجرا کند و Row خام برگرداند. تمام تحلیل سؤال، ranking و ساخت context به Service layer منتقل شود.
 
 ### تصمیم فنی
+سه مسئولیت مستقل تعریف شد:
 
-به جای بازنویسی یک‌باره `AiKnowledgeRepository`، جداسازی در چند گام انجام می‌شود تا امکان Validation هر مرحله وجود داشته باشد. در این گام دو Service جدید ایجاد شدند و endpoint فقط به Retriever وابسته شد.
+1. `QueryPreprocessor` → تحلیل و نرمال‌سازی Query.
+2. `AiKnowledgeRepository` → فقط Data Access.
+3. `KnowledgeRetriever` → orchestration، scoring/ranking و Context Building.
+
+این تقسیم دقیقاً بر اساس نیاز اولیه کاربر انجام شد و هیچ لایه یا Pattern اضافه‌ای خارج از این نیاز ایجاد نشد.
 
 ### فایل‌های تغییرکرده
 
-#### Added
+#### Updated — `app/Services/QueryPreprocessor.php`
+مسئولیت‌های زیر به این Service منتقل شد:
 
-- `app/Services/QueryPreprocessor.php` — نرمال‌سازی حروف فارسی/عربی، اعداد فارسی/عربی و نیم‌فاصله.
-- `app/Services/KnowledgeRetriever.php` — مرز Retrieval بین endpoint و Repository.
+- normalize حروف فارسی/عربی
+- تبدیل اعداد فارسی/عربی
+- stopword filtering
+- stemming سبک
+- synonym expansion
+- استخراج سن بر حسب ماه
+- استخراج جنسیت
 
-#### Updated
+متد `analyze()` اکنون خروجی ساختاریافته زیر را تولید می‌کند:
 
-- `public/ai-qa-ask.php` — جایگزینی وابستگی مستقیم `AiKnowledgeRepository` با `KnowledgeRetriever`.
+- `question`
+- `keywords`
+- `age_months`
+- `gender`
+
+#### Updated — `app/Repositories/AiKnowledgeRepository.php`
+منطق preprocessing، scoring و context formatting حذف شد.
+
+Repository اکنون فقط متدهای Data Access دارد، از جمله:
+
+- `findFaqs()`
+- `findArticles()`
+- `findPregnancyNutrition()`
+- `findPregnancyWeeks()`
+- `findPregnancyWarningSigns()`
+- `findPregnancyExercises()`
+- `findPregnancySupplements()`
+- `findMilestonesByAge()`
+- `findMilestonesByKeywords()`
+- `findGrowthByAgeAndGender()`
+
+خروجی این متدها Row خام دیتابیس است و Repository دیگر تصمیم نمی‌گیرد چه نتیجه‌ای مهم‌تر است یا چگونه باید به LLM نمایش داده شود.
+
+#### Updated — `app/Services/KnowledgeRetriever.php`
+منطق زیر از Repository به Retriever منتقل شد:
+
+- انتخاب sourceهای RAG
+- scoring بر اساس keyword match
+- ranking
+- محدودکردن نتایج هر منبع
+- تبدیل HTML article به متن
+- ساخت snippet مرتبط
+- ساخت context block نهایی برای `LlmService`
+- محدودکردن context کلی به ۱۲ block مانند رفتار قبلی
 
 ### Before → After
 
 **Before**
 
-`Endpoint → AiKnowledgeRepository → LlmService`
+`Repository = SQL + Preprocessing + Ranking + Context Builder`
 
 **After**
 
-`Endpoint → KnowledgeRetriever → QueryPreprocessor → AiKnowledgeRepository → LlmService`
+`QueryPreprocessor = Query Analysis`
 
-در این مرحله رفتار SQL و Context فعلی عمداً تغییر نکرده است. انتقال کامل keyword extraction/scoring/context building از Repository به Service در گام بعدی فاز 1 انجام می‌شود.
+`AiKnowledgeRepository = Database Access Only`
 
-### جزئیات پیاده‌سازی
+`KnowledgeRetriever = Retrieval + Ranking + Context Building`
 
-1. `QueryPreprocessor::normalize()` اضافه شد.
-2. حروف عربی `ي/ى/ك` به `ی/ی/ک` تبدیل می‌شوند.
-3. اعداد فارسی و عربی به اعداد لاتین تبدیل می‌شوند تا تشخیص سن پایدارتر باشد.
-4. نیم‌فاصله به فاصله تبدیل و فاصله‌های تکراری یکدست می‌شوند.
-5. `KnowledgeRetriever::retrieve()` ورودی کاربر را normalize می‌کند و سپس Retrieval موجود را فراخوانی می‌کند.
-6. endpoint دیگر Repository را instantiate نمی‌کند.
+### نکته مربوط به Keyword Processing
+در همان Scope اولیه، تکمیل Keyword Processing و پشتیبانی بهتر از اعداد فارسی خواسته شده بود. در این Change:
 
-### اثر روی بخش‌های دیگر
+- نرمال‌سازی اعداد فارسی و عربی در یک محل مرکزی انجام می‌شود.
+- WORD_NUMBERS از ۱ تا ۲۰ تکمیل شد؛ در نسخه قبلی برخی اعداد بین ۱۲ و ۲۰ وجود نداشتند.
+- synonym و stemming از Repository خارج شدند تا بعداً بدون دست‌زدن به SQL قابل توسعه باشند.
 
-UI، دیتابیس، Kavenegar، Profile، Crawler و سایر Featureها در این Change دست‌نخورده‌اند.
+### اثر روی دیتابیس
+هیچ Schema یا داده‌ای تغییر نکرد.
 
-### ملاحظات امنیتی
-
-این Change هیچ credential یا secret جدیدی اضافه نکرده است.
-
-### ملاحظات Performance
-
-فقط یک مرحله `strtr` و normalize سبک قبل از Retrieval اضافه شده است؛ Queryهای دیتابیس و تعداد context blockها تغییر نکرده‌اند.
+### اثر روی endpoint و LLM
+قرارداد `KnowledgeRetriever::retrieve()` و خروجی `string[]` برای `LlmService` حفظ شد؛ بنابراین endpoint نیازی به تغییر جدید نداشت.
 
 ### Validation / Test
 
-- PSR-4 پروژه بررسی شد و namespace `App\Services` به صورت خودکار از `app/Services` بارگذاری می‌شود.
-- `config/config.php` نیز fallback autoloader برای `App\` دارد؛ بنابراین فایل‌های Service جدید بدون تغییر Composer قابل resolve هستند.
-- فایل‌های ایجادشده از `main` بازخوانی شدند و dependencyهای آن‌ها بررسی شدند.
-- Endpoint بعد از Update از `KnowledgeRetriever` استفاده می‌کند.
-- تست Runtime/LLM واقعی در این مرحله از محیط GitHub Connector قابل اجرا نیست؛ بنابراین رفتار شبکه OpenRouter هنوز به عنوان Validation عملی تأیید نشده است.
+1. فایل‌های نهایی از شاخه `main` دوباره خوانده شدند و مسئولیت Repository بررسی شد؛ Repository جدید فقط Query و Row خام دارد.
+2. Retriever از متدهای جدید Repository استفاده می‌کند و scoring/context building در Service layer قرار گرفته است.
+3. `QueryPreprocessor.php` با `php -l` بررسی شد و نتیجه `No syntax errors detected` بود.
+4. Functional test محلی QueryPreprocessor در محیط ابزار متوقف شد، چون PHP نصب‌شده در محیط Validation فاقد extension `mbstring` است و `mb_strlen()` را ندارد.
+5. این محدودیت وابستگی جدیدی ایجادشده توسط Change نیست؛ نسخه قبلی پروژه نیز در AI از `mb_*` استفاده می‌کرد. بنابراین Runtime واقعی پروژه باید همچنان PHP `mbstring` داشته باشد.
+6. اتصال واقعی به MariaDB و OpenRouter از این محیط انجام نشده، پس نتیجه Runtime end-to-end در این Change ادعا نمی‌شود.
 
 ### Rollback
+برای Rollback باید سه فایل زیر به وضعیت MCC-CHANGE-002 برگردند:
 
-1. `public/ai-qa-ask.php` به استفاده مستقیم از `AiKnowledgeRepository` برگردد.
-2. `app/Services/KnowledgeRetriever.php` حذف شود.
-3. `app/Services/QueryPreprocessor.php` حذف شود.
+- `app/Services/QueryPreprocessor.php`
+- `app/Repositories/AiKnowledgeRepository.php`
+- `app/Services/KnowledgeRetriever.php`
 
 ### نتیجه نهایی
-
-فاز 1 شروع شده و اولین boundary لازم برای جداسازی AI Logic از Data Access ایجاد شده است، بدون دست‌زدن به Featureهای خارج از Scope.
+در پایان این Change، بخش اصلی فاز ۱ انجام شده است: Database Access مربوط به RAG از preprocessing، ranking و Context Building جدا شده و ساختار خواسته‌شده برای Retriever مستقل وجود دارد.
 
 ---
 
 ## قواعد ادامه کار
 
-برای جلوگیری از تبدیل این فایل به یک Changelog مبهم، موارد زیر رعایت می‌شوند:
+برای ادامه پروژه:
 
-1. عبارت‌هایی مانند «مشکل حل شد» بدون توضیح فنی کافی نیستند.
-2. نام فایل‌ها و Componentهای تغییرکرده صریحاً نوشته می‌شوند.
-3. در Bug Fix، تفاوت Symptom و Root Cause مشخص می‌شود.
-4. اگر Validation کامل امکان‌پذیر نباشد، محدودیت آن صریحاً ثبت می‌شود.
-5. نتیجه‌ی تست واقعی با نتیجه‌ی مورد انتظار اشتباه گرفته نمی‌شود.
-6. تغییرات مرتبط با یک درخواست تا حد امکان با یک Change ID مشخص نگهداری می‌شوند.
-7. هر زمان تصمیم معماری مهمی گرفته شود، دلیل تصمیم نیز ثبت می‌شود تا در آینده از روی کد مجبور به حدس زدن نباشیم.
+1. Feature بعدی فقط از Roadmap Scope-locked انتخاب می‌شود.
+2. قبل از هر تغییر، وضعیت واقعی کد و دیتابیس بررسی می‌شود.
+3. تغییرات کوچک و قابل Validation نگه داشته می‌شوند.
+4. هر Change با دلیل، Before/After و محدودیت Validation در همین سند ثبت می‌شود.
