@@ -16,7 +16,6 @@ if (file_exists(BASE_PATH . '/vendor/autoload.php')) {
     /*
      * فال‌بک: تا وقتی Composer نصب/اجرا نشده، این autoloader ساده
      * کلاس‌های namespace‌ی App\ رو از پوشه‌ی app/ پیدا می‌کنه.
-     * وقتی Composer رو راه انداختید، این بلاک عملاً استفاده نمی‌شه.
      */
     spl_autoload_register(function ($class) {
         $prefix = 'App\\';
@@ -32,11 +31,17 @@ if (file_exists(BASE_PATH . '/vendor/autoload.php')) {
 }
 
 /*
- * سشن رو همینجا و همیشه اول از همه استارت می‌کنیم (قبل از هر echo/HTML).
- * چون header.php وسط <body> صفحات مختلف include می‌شه، اگه session_start()
- * رو اونجا صدا بزنیم، اون موقع دیگه هدرهای HTTP فرستاده شدن و session کار نمی‌کنه.
- * اینجا (بالای همه‌چیز، همون اول config.php) هنوز هیچ خروجی‌ای ارسال نشده.
+ * Session مرکزی قبل از هر خروجی HTML.
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+/*
+ * ثبت Requestهای کاربر لاگین‌شده برای history/personalization.
+ * UserActivityRepository fail-safe است؛ اگر Migration هنوز اجرا نشده باشد،
+ * Logging نباید Request اصلی سایت را مختل کند.
+ */
+if (isset($_SESSION['user_id'])) {
+    (new \App\Services\UserActivityService())->captureCurrentRequest((int) $_SESSION['user_id']);
 }
