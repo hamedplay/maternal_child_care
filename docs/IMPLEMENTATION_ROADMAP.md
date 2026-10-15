@@ -1,205 +1,161 @@
 # نقشه راه اجرای درخواست‌های Maternal Child Care
 
-این سند فقط و فقط درخواست‌های اولیه کاربر برای توسعه سامانه را فازبندی می‌کند. هیچ Feature، Refactor یا Hardening خارج از این Scope نباید صرفاً به دلیل «بهتر بودن معماری» انجام شود.
+این سند فقط درخواست‌های اولیه کاربر را فازبندی می‌کند. هیچ Feature، Refactor یا Hardening خارج از این Scope نباید صرفاً به دلیل «بهتر بودن معماری» انجام شود.
 
-> اصل اجرایی هر Task: Inspect → Requirement / Root Cause → Minimal Design → Implement → Validate → Document
+> اصل اجرایی: Inspect → Requirement / Root Cause → Minimal Design → Implement → Validate → Document
 
-## منابع مرجع پروژه
+## منابع مرجع
 
-- کد واقعی Repository در شاخه `main`
-- Dump واقعی دیتابیس `maternal_child_care` که ساختار MariaDB و داده‌های موجود را نشان می‌دهد
-- `docs/CHANGE_LOG.md` برای ثبت آموزشی تمام تغییرات انجام‌شده
+- کد واقعی شاخه `main`
+- Dump واقعی MariaDB پروژه
+- `docs/CHANGE_LOG.md`
 
 ## قواعد Scope
 
-1. فقط نیازهایی که در درخواست اولیه کاربر آمده‌اند اجرا می‌شوند.
-2. Refactor فقط وقتی انجام می‌شود که مستقیماً برای یکی از همان نیازها لازم باشد.
-3. هیچ Feature جانبی به Admin، Logging، Security، Profile، AI یا Crawler اضافه نمی‌شود مگر در همان درخواست وجود داشته باشد.
-4. هر تغییر واقعی در `docs/CHANGE_LOG.md` با Before → After، دلیل، نحوه اجرا و Validation ثبت می‌شود.
-5. تغییرات دیتابیس باید بر اساس ساختار واقعی Dump انجام شوند، نه بر اساس حدس.
+1. فقط نیازهای درخواست اولیه اجرا می‌شوند.
+2. Refactor فقط وقتی انجام می‌شود که مستقیماً برای همان نیازها لازم باشد.
+3. تغییر دیتابیس فقط بر اساس Schema واقعی انجام می‌شود.
+4. هر تغییر با Before → After، دلیل و Validation در `CHANGE_LOG.md` ثبت می‌شود.
 
 ---
 
-# فاز 1 — جداسازی Data Access از منطق AI/RAG و تکمیل Pipeline
+# فاز ۱ — AI/RAG و جداسازی Data Access
 
-## هدف
+**وضعیت: انجام‌شده برای بخش جداسازی معماری؛ ادامه قابلیت‌های AI در فاز ۳**
 
-اجرای مستقیم درخواست کاربر برای جدا کردن دسترسی دیتابیس از منطق، تکمیل Keyword Processing و ایجاد Retriever مستقل، بدون بازطراحی بخش‌های نامرتبط پروژه.
+## نیازهای پوشش‌داده‌شده
 
-## وضعیت فعلی
+- جدا کردن Database Access از Logic.
+- ایجاد Retriever مستقل.
+- جدا کردن Keyword Processing از Repository.
+- نرمال‌سازی اعداد فارسی/عربی و متن فارسی.
 
-- `AiKnowledgeRepository` علاوه بر SQL، preprocessing، keyword extraction، تشخیص سن/جنسیت، scoring و context generation را نیز انجام می‌دهد.
-- `LlmService` context و history را با prompt ترکیب کرده و به OpenRouter می‌فرستد.
-- بخشی از پشتیبانی اعداد فارسی/عربی و synonymها از قبل وجود دارد اما باید مطابق نیاز تکمیل شود.
+## ساختار نهایی این فاز
 
-## کارهای این فاز
+`Endpoint → KnowledgeRetriever → QueryPreprocessor + AiKnowledgeRepository → LlmService`
 
-1. جدا کردن منطق Query/DB از preprocessing و retrieval.
-2. ایجاد/تکمیل Query Preprocessor برای:
-   - نرمال‌سازی `ی/ي`
-   - نرمال‌سازی `ک/ك`
-   - نیم‌فاصله
-   - اعداد فارسی، عربی و لاتین
-   - stopword / keyword / synonymهای موردنیاز حوزه مادر، بارداری، نوزاد و کودک
-3. ایجاد Retriever مستقل برای جستجو در منابع موجود دیتابیس.
-4. ساخت Context از نتایج Retriever و ارسال آن از طریق `LlmService` به مدل.
-5. بررسی و رفع باگ «درخواست اول AI کار نمی‌کند» بر اساس Root Cause واقعی.
-6. استفاده از OpenRouter در `config/ai.php` مطابق ساختار پروژه و قابل تنظیم بودن API key/model.
-7. ذخیره سؤال و پاسخ AI در دیتابیس، چون کاربر صراحتاً خواسته تعاملات Chat ذخیره شوند.
-8. Validation با سؤال‌های فارسی، سن کودک و اعداد فارسی/لاتین.
+- `QueryPreprocessor` = normalize + keywords + age/gender extraction
+- `AiKnowledgeRepository` = Data Access only
+- `KnowledgeRetriever` = source selection + ranking + context building
 
-## خارج از Scope این فاز
-
-- بازطراحی Repositoryهای نامرتبط
-- تغییر UIهای نامرتبط
-- اضافه‌کردن سیستم Vector DB مگر اینکه برای نیاز فعلی واقعاً ضروری شود
+جزئیات در `MCC-CHANGE-002` و `MCC-CHANGE-003` ثبت شده است.
 
 ---
 
-# فاز 2 — Login / Registration و OTP با Kavenegar
+# فاز ۲ — Login/Register و OTP با Kavenegar
 
-## هدف
+**وضعیت: در حال اجرا — کد Integration آماده است؛ ارسال واقعی نیازمند credential محیط اجرا است**
 
-تکمیل احراز هویت با شماره تلفن و ارسال/تأیید OTP از Kavenegar.
+## Scope
 
-## وضعیت فعلی
+- ارسال OTP به شماره موبایل از Kavenegar Verify Lookup.
+- نگهداری server-side اطلاعات لازم برای verify بدون ذخیره OTP plaintext.
+- Verify کد واردشده.
+- Login/Register خودکار بعد از verify.
+- Resend، expiry و محدودیت تلاش.
 
-`AuthService`، `OtpRepository` و `KavenegarService` از قبل وجود دارند و بخش عمده چرخه OTP پایه پیاده‌سازی شده است.
+## وضعیت واقعی فعلی
 
-## کارها
+- `AuthService` وجود دارد.
+- `OtpRepository` وجود دارد.
+- `KavenegarService` وجود دارد.
+- endpointهای send/verify وجود دارند.
+- UI Login/OTP به endpointها متصل است.
+- جدول `otp_verifications` در دیتابیس واقعی وجود دارد.
+- API Key از `KAVENEGAR_API_KEY` و Template از `KAVENEGAR_OTP_TEMPLATE` خوانده می‌شوند.
 
-1. بررسی فرم‌ها و endpointهای ورود/ثبت‌نام فعلی.
-2. اتصال Kavenegar با API key در محل تنظیم‌شده برای سرویس.
-3. ارسال OTP به شماره کاربر.
-4. تأیید کدی که کاربر وارد می‌کند با OTP ذخیره‌شده سمت سرور.
-5. استفاده از ساختار امن فعلی hash برای Verification؛ نیازی به ذخیره دائمی OTP خام نیست.
-6. بررسی expiration، resend و تعداد تلاش‌های اشتباه در مسیر واقعی UI/API.
-7. Validation کامل Login/Register.
+## کار باقی‌مانده
 
----
-
-# فاز 3 — تکمیل محتوای نوزاد/کودک، Crawler و پاک‌سازی تبلیغات گهواره
-
-## هدف
-
-تکمیل بخش نوزاد و کودک با منبع معتبر و پاک‌کردن تبلیغات گهواره از HTML مقالات Crawled.
-
-## وضعیت واقعی دیتابیس
-
-- `articles.content` از نوع HTML/longtext است.
-- داخل HTML فعلی CTA نصب اپلیکیشن، تصویر اپلیکیشن و لینک‌های تبلیغاتی گهواره وجود دارد.
-- جداول کودک از قبل شامل داده‌هایی مثل Nutrition، Supplements، Development Milestones، Growth Standards و Vaccination Schedule هستند.
-
-## کارها
-
-1. انتخاب منبع معتبر برای تکمیل محتوای Infant/Child.
-2. بررسی امکان Crawl/استفاده از منبع قبل از Import.
-3. تکمیل Crawler و Export مربوط به آن.
-4. تکمیل بخش نوزاد.
-5. تکمیل بخش کودک مشابه ساختار Pregnancy با استفاده از داده‌های واقعی موجود و داده‌های جدید لازم.
-6. ایجاد پاک‌ساز HTML برای حذف مشخصاً:
-   - تبلیغ نصب اپلیکیشن گهواره
-   - CTAهای تبلیغاتی گهواره
-   - تصاویر تبلیغاتی گهواره
-   - بلوک‌های تبلیغاتی مرتبط
-7. حفظ محتوای اصلی مقاله مثل heading، paragraph، list و table.
-8. پاک‌سازی داده‌های موجود و اعمال همان منطق روی Importهای بعدی.
-9. اتصال محتوای تکمیل‌شده به Retriever/RAG.
+- تنظیم API Key و Template واقعی در محیط اجرا.
+- تست واقعی ارسال SMS، wrong code، expiry و resend روی سرور متصل به Kavenegar.
 
 ---
 
-# فاز 4 — Profile، ذخیره تعاملات کاربر و Personalization
+# فاز ۳ — تکمیل AI/RAG
 
-## هدف
+**وضعیت: بعد از فاز ۲**
 
-کامل‌تر کردن اطلاعات کاربر و استفاده از تعاملات واقعی او برای شخصی‌سازی سامانه.
+## Scope
 
-## وضعیت فعلی
-
-جدول `users` فعلاً اطلاعات محدودی مانند شماره تلفن و نام دارد.
-
-## کارها
-
-1. تکمیل فیلدهای پروفایل موردنیاز سامانه.
-2. ایجاد UI/API لازم برای ورود و ویرایش اطلاعات شخصی بعد از Login.
-3. ذخیره تعاملات کاربر که در درخواست اولیه ذکر شده‌اند، از جمله Chat/Message و فعالیت‌های لازم برای پیشنهاد محتوا.
-4. مشخص‌کردن محل ذخیره Transaction/Interactionهای موردنیاز سامانه در دیتابیس.
-5. پیاده‌سازی Personalization بر اساس اطلاعات پروفایل و تعاملات ثبت‌شده.
-6. پیشنهاد FAQ و Article مرتبط با نیاز کاربر.
-7. ذخیره Conversation/Messageهای AI و اتصال آن‌ها به کاربر.
+- پیدا کردن Root Cause باگ «اولین درخواست AI کار نمی‌کند».
+- تکمیل keywordها/synonymهای domain در حد نیاز واقعی.
+- استفاده از Retriever مستقل ایجادشده در فاز ۱.
+- اتصال context دیتابیس به Prompt و OpenRouter.
+- تنظیم OpenRouter از `config/ai.php` طبق درخواست.
+- ذخیره سؤال و پاسخ AI در دیتابیس.
 
 ---
 
-# فاز 5 — ارتباط با پزشک و Reminder با بله
+# فاز ۴ — Infant/Child Content و Crawler
 
-## ارتباط با پزشک
+**وضعیت: برنامه‌ریزی‌شده**
 
-1. ایجاد گزینه «ارتباط با پزشک» مشابه تجربه Support.
-2. ذخیره درخواست و پیام کاربر در دیتابیس.
-3. امکان پیگیری وضعیت درخواست.
+## Scope
 
-## Reminder
-
-1. کاربر بتواند زمان ویزیت پزشک را ثبت کند.
-2. کاربر بتواند دارو/زمان مصرف را ثبت کند.
-3. Reminder در زمان تعیین‌شده ارسال شود.
-4. Provider ارسال مورد درخواست کاربر «بله» است و اتصال آن در این فاز انجام می‌شود.
+- انتخاب منبع معتبر برای محتوای نوزاد/کودک.
+- تکمیل بخش نوزاد.
+- ایجاد/تکمیل بخش کودک مشابه Pregnancy.
+- Crawler و export/import موردنیاز.
 
 ---
 
-# فاز 6 — Admin Panel
+# فاز ۵ — حذف تبلیغات گهواره از Articles
 
-## هدف
+**وضعیت: برنامه‌ریزی‌شده**
 
-ایجاد پنل مدیریت برای قابلیت‌هایی که در همین Scope توسعه داده شده‌اند.
+## Scope
 
-## بخش‌های موردنیاز
-
-1. مدیریت کاربران و اطلاعات پروفایل.
-2. مدیریت Article / FAQ / محتوای Pregnancy / Infant / Child.
-3. مدیریت پیام‌های Support.
-4. مدیریت درخواست‌های ارتباط با پزشک.
-5. مشاهده/مدیریت داده‌های مرتبط با Reminder در حد نیاز عملیاتی.
-6. مشاهده Conversationهای AI در حد نیاز مدیریت سامانه.
-7. مدیریت وضعیت محتوای Crawled/Imported در حد نیاز پروژه.
-
-هیچ ماژول مدیریتی خارج از Featureهای بالا در این فاز اضافه نمی‌شود.
+- حذف CTA نصب اپلیکیشن گهواره.
+- حذف بلوک‌ها و تصاویر تبلیغاتی گهواره.
+- حفظ HTML محتوایی مقاله.
+- اعمال پاک‌سازی روی داده‌های موجود و ورودی‌های بعدی Crawler.
 
 ---
 
-# ترتیب اجرای نهایی
+# فاز ۶ — Profile، User Data، Logging و Personalization
 
-1. **Phase 1 — Data Access separation + AI/RAG pipeline**
-2. **Phase 2 — Authentication + Kavenegar OTP**
-3. **Phase 3 — Infant/Child + Crawler + Ghevareh ad cleanup**
-4. **Phase 4 — Profile + Interaction persistence + Personalization + Recommender**
-5. **Phase 5 — Doctor Contact + Bale Reminder**
-6. **Phase 6 — Admin Panel**
+**وضعیت: برنامه‌ریزی‌شده**
 
-این ترتیب فقط بر اساس وابستگی بین نیازهای خود کاربر انتخاب شده است؛ مثلاً Personalization به هویت کاربر و ثبت Interaction وابسته است و Admin باید بعد از مشخص‌شدن Entityهای نهایی Featureها تکمیل شود.
+## Scope
+
+- کامل‌تر شدن پروفایل.
+- ورود داده‌های شخصی موردنیاز بعد از Login.
+- ذخیره تعاملات در DB در محدوده درخواست اولیه.
+- ذخیره AI chat.
+- Personalization.
+- پیشنهاد Article/FAQ بر اساس نیاز کاربر.
 
 ---
 
-# Definition of Done برای هر Task
+# فاز ۷ — Doctor Contact و Reminder با Bale
 
-هر Task فقط زمانی Done است که:
+**وضعیت: برنامه‌ریزی‌شده**
+
+## Scope
+
+- گزینه ارتباط با پزشک مشابه Support اما با workflow مخصوص خودش.
+- ثبت appointment/medication reminder.
+- ارسال Reminder با API بله طبق درخواست.
+
+---
+
+# فاز ۸ — Admin Panel
+
+**وضعیت: برنامه‌ریزی‌شده**
+
+## Scope
+
+پنل مدیریتی فقط برای مدیریت قابلیت‌های همین پروژه و Featureهای درخواست‌شده ایجاد می‌شود؛ Feature مدیریتی خارج از این Scope اضافه نمی‌شود.
+
+---
+
+# Definition of Done
+
+یک Task فقط زمانی Done است که:
 
 1. وضعیت واقعی قبل از تغییر بررسی شده باشد.
-2. تغییر مستقیماً به یکی از نیازهای اولیه کاربر مربوط باشد.
-3. Minimal implementation انجام شده باشد.
-4. Validation واقعی متناسب با همان Task انجام شده باشد.
-5. تغییر در `docs/CHANGE_LOG.md` به شکل آموزشی ثبت شده باشد.
-6. اگر ساختار دیتابیس تغییر کرده، SQL لازم برای همان تغییر نیز مستند/قابل اعمال باشد.
-
----
-
-# تفکیک‌هایی که خود درخواست به آن‌ها نیاز دارد
-
-- Data Access از AI/RAG Logic
-- Retriever از LLM call
-- Support از Doctor Contact
-- User Profile از AI Conversation
-- Crawler/Importer از نمایش Runtime سایت
-- Reminder Data از Provider ارسال «بله»
-
-این تفکیک‌ها فقط برای پیاده‌سازی مستقیم Featureهای درخواستی انجام می‌شوند و نباید به Refactor عمومی پروژه تبدیل شوند.
+2. تغییر فقط در Scope کاربر باشد.
+3. پیاده‌سازی انجام شده باشد.
+4. Validation واقعی متناسب با دسترسی موجود انجام شود.
+5. محدودیت Validation صریح نوشته شود.
+6. تغییر در `docs/CHANGE_LOG.md` مستند شود.
