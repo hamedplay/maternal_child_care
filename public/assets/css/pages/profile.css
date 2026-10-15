@@ -32,15 +32,18 @@
 .profile-field label { color: #42586b; font-size: 14px; }
 
 .profile-field input,
-.profile-field select {
+.profile-field select,
+.profile-field textarea {
     min-height: 44px;
-    padding: 0 12px;
+    padding: 10px 12px;
     border: 1px solid #d8e3e9;
     border-radius: 10px;
     font: inherit;
     background: #fff;
+    box-sizing: border-box;
 }
 
+.profile-field textarea { resize: vertical; line-height: 1.8; }
 .profile-field input[readonly] { background: #f6f8fa; color: #667788; }
 .profile-actions { margin-top: 22px; display: flex; justify-content: flex-end; }
 
