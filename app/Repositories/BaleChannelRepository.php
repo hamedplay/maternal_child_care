@@ -35,7 +35,11 @@ class BaleChannelRepository
         ]);
     }
 
-    public function consumeLinkToken(string $tokenHash): ?int
+    /**
+     * Token consumption و اتصال chat_id در یک Transaction انجام می‌شوند تا Token
+     * در صورت شکست اتصال، مصرف‌شده باقی نماند.
+     */
+    public function consumeAndConnect(string $tokenHash, string $chatId): ?int
     {
         $pdo = Database::connection();
         $pdo->beginTransaction();
@@ -58,30 +62,28 @@ class BaleChannelRepository
                 return null;
             }
 
+            $userId = (int) $row['user_id'];
+            $connect = $pdo->prepare(
+                'INSERT INTO bale_user_channels (user_id, chat_id, is_active)
+                 VALUES (:user_id, :chat_id, 1)
+                 ON DUPLICATE KEY UPDATE
+                    chat_id = VALUES(chat_id),
+                    is_active = 1,
+                    connected_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP'
+            );
+            $connect->execute(['user_id' => $userId, 'chat_id' => $chatId]);
+
             $update = $pdo->prepare('UPDATE bale_link_tokens SET used_at = NOW() WHERE id = :id');
             $update->execute(['id' => $row['id']]);
-            $pdo->commit();
 
-            return (int) $row['user_id'];
+            $pdo->commit();
+            return $userId;
         } catch (\Throwable $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
             throw $e;
         }
-    }
-
-    public function connect(int $userId, string $chatId): void
-    {
-        $stmt = Database::connection()->prepare(
-            'INSERT INTO bale_user_channels (user_id, chat_id, is_active)
-             VALUES (:user_id, :chat_id, 1)
-             ON DUPLICATE KEY UPDATE
-                chat_id = VALUES(chat_id),
-                is_active = 1,
-                connected_at = CURRENT_TIMESTAMP,
-                updated_at = CURRENT_TIMESTAMP'
-        );
-        $stmt->execute(['user_id' => $userId, 'chat_id' => $chatId]);
     }
 }
