@@ -45,22 +45,29 @@
 
 # فاز ۲ — Login/Register و OTP با Kavenegar
 
-**وضعیت: پیاده‌سازی کد انجام‌شده؛ تست SMS واقعی وابسته به credential محیط اجرا**
+**وضعیت: پیاده‌سازی کد انجام‌شده؛ فقط تست SMS واقعی وابسته به credential محیط اجرا است**
 
 ## انجام‌شده
 
 - بررسی کامل UI → send endpoint → AuthService → Kavenegar → verify endpoint.
 - حفظ OTP به‌صورت hash برای server-side verification.
 - اصلاح ترتیب ارسال/ثبت OTP تا SMS شکست‌خورده OTP قبلی را خراب نکند.
-- اتصال صریح Verify Lookup با `type=sms`.
+- اتصال Verify Lookup رسمی Kavenegar با `receptor/token/template/type=sms`.
+- بررسی مستقیم مستند رسمی `kavenegar.com/rest.html`.
+- تبدیل نتیجه Kavenegar از boolean ساده به نتیجه ساختاریافته شامل `success/status/message`.
+- تفکیک Transport Error از Provider/API Error.
+- پوشش خطاهای مهم رسمی مثل `401/403/409/418/422/424/426/429/431/432/451`.
+- حذف log کردن کل Response Provider و نگهداری فقط HTTP/status/message برای جلوگیری از ورود receptor/token/message به log.
+- حفظ این اصل که فقط بعد از Send موفق، OTP قبلی invalidate و OTP جدید persist شود.
 
 ## باقی‌مانده محیط اجرا
 
 - تنظیم `KAVENEGAR_API_KEY`.
-- تنظیم `KAVENEGAR_OTP_TEMPLATE`.
+- تنظیم `KAVENEGAR_OTP_TEMPLATE` با Template تاییدشده که `%token` دارد.
+- اطمینان از فعال بودن سرویس موردنیاز Verify Lookup روی حساب.
 - تست واقعی send / wrong-code / expiry / resend.
 
-جزئیات: `MCC-CHANGE-004`.
+جزئیات: `MCC-CHANGE-004`, `MCC-CHANGE-009`.
 
 ---
 
