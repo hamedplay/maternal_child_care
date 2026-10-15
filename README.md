@@ -379,7 +379,7 @@ OpenRouter
 
 ```text
 growth.php
-aaccine.php      ← توجه: فایل واقعی پروژه `vaccine.php` است
+vaccine.php
 child-nutrition.php
 milestones.php
 conditions.php
