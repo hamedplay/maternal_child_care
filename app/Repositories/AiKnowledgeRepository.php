@@ -107,11 +107,12 @@ class AiKnowledgeRepository
                 'SELECT nutrition_stage, age_start_months, age_end_months, recommended_foods,
                         foods_to_avoid, meal_frequency, tips
                  FROM child_nutrition
-                 WHERE age_start_months <= :age AND age_end_months >= :age
+                 WHERE age_start_months <= :age_start AND age_end_months >= :age_end
                  ORDER BY age_start_months
                  LIMIT :limit'
             );
-            $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_start', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_end', $ageMonths, PDO::PARAM_INT);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -141,12 +142,13 @@ class AiKnowledgeRepository
                 'SELECT supplement_name, description, benefits, dosage, age_start_months,
                         age_end_months, daily_requirement, food_sources, precautions, is_essential
                  FROM child_supplements
-                 WHERE age_start_months <= :age
-                   AND (age_end_months IS NULL OR age_end_months >= :age)
+                 WHERE age_start_months <= :age_start
+                   AND (age_end_months IS NULL OR age_end_months >= :age_end)
                  ORDER BY is_essential DESC, age_start_months
                  LIMIT :limit'
             );
-            $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_start', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_end', $ageMonths, PDO::PARAM_INT);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -189,12 +191,14 @@ class AiKnowledgeRepository
                         age_min_months, age_max_months, precautions
                  FROM vaccination_schedule
                  WHERE (age_min_months IS NOT NULL AND age_max_months IS NOT NULL
-                        AND age_min_months <= :age AND age_max_months >= :age)
-                    OR age_in_months = :age
+                        AND age_min_months <= :age_min AND age_max_months >= :age_max)
+                    OR age_in_months = :age_exact
                  ORDER BY age_in_months, dose_number
                  LIMIT :limit'
             );
-            $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_min', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_max', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_exact', $ageMonths, PDO::PARAM_INT);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -223,11 +227,12 @@ class AiKnowledgeRepository
             $stmt = Database::connection()->prepare(
                 'SELECT milestone_name, category, description, age_months_start, age_months_end, warning_signs
                  FROM development_milestones
-                 WHERE age_months_start <= :age AND age_months_end >= :age
+                 WHERE age_months_start <= :age_start AND age_months_end >= :age_end
                  ORDER BY category
                  LIMIT :limit'
             );
-            $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_start', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':age_end', $ageMonths, PDO::PARAM_INT);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
