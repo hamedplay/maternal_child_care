@@ -38,7 +38,9 @@ try {
         exit(1);
     }
 
-    $due = $repository->findDue(100);
+    // config.php timezone را Asia/Tehran تنظیم می‌کند؛ مقایسه due نیز با همان timezone انجام می‌شود.
+    $now = date('Y-m-d H:i:s');
+    $due = $repository->findDue($now, 100);
     fwrite(STDOUT, 'Due reminders: ' . count($due) . PHP_EOL);
 
     foreach ($due as $reminder) {
@@ -53,7 +55,7 @@ try {
 
         $result = $bale->sendMessage((string) $reminder['chat_id'], $text);
         if ($result['success']) {
-            $repository->markSent((int) $reminder['id']);
+            $repository->markSent((int) $reminder['id'], date('Y-m-d H:i:s'));
             fwrite(STDOUT, 'Sent reminder #' . (int) $reminder['id'] . PHP_EOL);
         } else {
             $error = (string) ($result['error'] ?? 'Unknown Bale error');
