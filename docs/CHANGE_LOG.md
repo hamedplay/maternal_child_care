@@ -533,11 +533,117 @@ CDC انگلیسی است و دیتابیس/رابط پروژه فارسی اس�
 
 ---
 
+## MCC-CHANGE-009 — تکمیل Error Handling رسمی Kavenegar Verify Lookup
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+بعد از بررسی مستند رسمی REST کاوه‌نگار مشخص شد Integration از endpoint صحیح `verify/lookup` استفاده می‌کند، اما `KavenegarService::sendOtp()` فقط `true/false` برمی‌گرداند و تمام خطاهای Provider برای `AuthService` یکسان دیده می‌شوند.
+
+این باعث می‌شد خطاهای متفاوتی مثل API Key نامعتبر، اعتبار ناکافی، Template اشتباه یا تاییدنشده، فعال نبودن سرویس پیشرفته، ساختار نامعتبر token و اختلال موقت API همگی با یک پیام عمومی نمایش داده شوند.
+
+### وضعیت قبل
+
+`KavenegarService::sendOtp()`:
+
+- HTTP request را اجرا می‌کرد.
+- `return.status=200` را Success می‌دانست.
+- در هر خطای دیگر فقط `false` برمی‌گرداند.
+- روی خطای API کل response را در log می‌نوشت.
+
+`AuthService` فقط می‌توانست تشخیص دهد «ارسال موفق بود یا نبود».
+
+### مبنای رسمی
+طبق مستند رسمی Kavenegar REST:
+
+- endpoint اعتبارسنجی: `verify/lookup.json`
+- `receptor`، `token` و `template` پارامترهای اصلی هستند.
+- `type=sms` برای ارسال متنی معتبر است و SMS مقدار پیش‌فرض نیز هست.
+- `return.status=200` نشان‌دهنده موفقیت است.
+- خطاهای اختصاصی Verify Lookup شامل `418`, `422`, `424`, `426`, `428`, `431`, `432`, `607` هستند.
+- خطاهای عمومی Account/API مثل `401`, `403`, `409`, `429`, `451` نیز ممکن است رخ دهند.
+
+### تغییر `KavenegarService`
+Return type از `bool` به نتیجه ساختاریافته تبدیل شد:
+
+```text
+success
+status
+message
+transport_error (در خطای ارتباطی)
+```
+
+حالت‌های جداگانه اکنون قابل تشخیص‌اند:
+
+1. Dev mode بدون API Key.
+2. cURL/Transport failure.
+3. پاسخ JSON نامعتبر.
+4. HTTP/API error.
+5. Success با `status=200`.
+
+### Logging
+در نسخه قبلی روی failure کل response Provider log می‌شد. این رفتار حذف شد.
+
+اکنون فقط موارد زیر ثبت می‌شوند:
+
+- HTTP status
+- Kavenegar return status
+- Kavenegar return message
+
+دلیل: response ممکن است شامل receptor، متن پیام یا OTP باشد و ثبت کامل آن برای عیب‌یابی لازم نیست.
+
+### تغییر `AuthService`
+`requestOtp()` اکنون نتیجه ساختاریافته Provider را دریافت می‌کند.
+
+خطاهای Provider به پیام‌های قابل فهم تبدیل می‌شوند، از جمله:
+
+- `401/403` → تنظیمات یا دسترسی سرویس معتبر نیست.
+- `411` → شماره توسط Provider معتبر تشخیص داده نشد.
+- `418` → اعتبار سرویس کافی نیست.
+- `424` → Template وجود ندارد یا هنوز تایید نشده است.
+- `426` → Verify Lookup/سرویس پیشرفته روی حساب فعال نیست.
+- `409/429/451` → مشکل موقت یا محدودیت سرویس.
+- `422/431/432` → تنظیمات Token/Template نیاز به بررسی دارد.
+
+API Key یا اطلاعات Secret در پاسخ UI قرار نمی‌گیرند.
+
+### Workflow OTP بعد از تغییر
+Workflow قبلی Change 004 حفظ شد:
+
+`generate → Kavenegar send → if success: invalidate previous → persist new OTP`
+
+بنابراین Provider error هنوز باعث ایجاد OTP ارسال‌نشده یا خراب‌شدن OTP قبلی نمی‌شود.
+
+### فایل‌های تغییرکرده
+
+- `app/Services/KavenegarService.php`
+- `app/Services/AuthService.php`
+- `docs/CHANGE_LOG.md`
+- `docs/IMPLEMENTATION_ROADMAP.md`
+
+### Validation
+
+- مستند رسمی `https://kavenegar.com/rest.html` برای Verify Lookup دوباره بررسی شد.
+- endpoint، پارامترهای `receptor/token/template/type` و success status رسمی با کد تطبیق داده شدند.
+- `KavenegarService` و `AuthService` بعد از Update از `main` بازخوانی شدند و قرارداد `sendOtp(): array` در caller نیز به‌روزرسانی شده است.
+- Success فقط با `status=200` پذیرفته می‌شود.
+- در Provider failure هیچ `invalidateActiveForPhone()` یا `create()` اجرا نمی‌شود.
+- تست End-to-End ارسال واقعی هنوز به `KAVENEGAR_API_KEY`، Template تاییدشده و حساب واقعی Kavenegar نیاز دارد و در این محیط انجام نشده است.
+
+### Rollback
+برای Rollback باید `KavenegarService::sendOtp()` به قرارداد boolean و `AuthService::requestOtp()` به بررسی boolean برگردد. Schema دیتابیس در این Change تغییر نکرده است.
+
+### نتیجه نهایی
+فاز OTP از نظر Integration کد اکنون با ساختار رسمی Kavenegar REST سازگارتر است و خطاهای اصلی Provider قابل تشخیص و عیب‌یابی‌اند، بدون اینکه Token/API Key یا response کامل سرویس در UI یا log افشا شود.
+
+---
+
 ## وضعیت ادامه کار
 
-بعد از MCC-CHANGE-008:
+بعد از MCC-CHANGE-009:
 
 - Phase 1 انجام شده است.
-- Phase 2 از نظر کد آماده و تست واقعی Kavenegar وابسته به credential محیط اجرا است.
+- Phase 2 از نظر کد و Error Handling رسمی Kavenegar انجام شده و فقط Validation واقعی SMS به credential/Template/حساب محیط اجرا وابسته است.
 - Phase 3 بخش اصلی AI/RAG را پیاده‌سازی کرده و Migration باید روی DB واقعی اجرا شود.
 - Phase 4 شروع شده و Crawler CDC موجود است؛ مرحله بعد Import محتوای بازبینی‌شده و ساخت Child/Infant UI مشابه Pregnancy است.
