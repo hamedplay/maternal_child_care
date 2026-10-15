@@ -9,7 +9,10 @@ class ArticleContentSanitizer
 {
     public function removeGahvareAds(string $html): string
     {
-        if (trim($html) === '' || stripos($html, 'gahvare') === false && mb_stripos($html, 'گهواره') === false) {
+        if (
+            trim($html) === '' ||
+            (stripos($html, 'gahvare') === false && mb_stripos($html, 'گهواره') === false)
+        ) {
             return $html;
         }
 
@@ -61,14 +64,14 @@ class ArticleContentSanitizer
             }
         }
 
-        // بلوک‌هایی که صریحاً متن تبلیغ اپلیکیشن گهواره دارند.
+        // فقط بلوک‌های کوچک/محلی با متن تبلیغاتی حذف می‌شوند؛ wrapper بزرگ مقاله هرگز حذف نمی‌شود.
         foreach ($xpath->query('//p | //div') ?: [] as $node) {
-            if (!($node instanceof \DOMElement)) {
+            if (!($node instanceof \DOMElement) || $node->getAttribute('id') === 'gahvare-clean-root') {
                 continue;
             }
 
             $text = $this->normalizeText($node->textContent);
-            if ($this->looksLikePromotionalCopy($text)) {
+            if (mb_strlen($text) <= 600 && $this->looksLikePromotionalCopy($text)) {
                 $toRemove[] = $this->promotionalContainer($node);
             }
         }
@@ -122,11 +125,14 @@ class ArticleContentSanitizer
 
             if ($tag === 'div') {
                 $class = strtolower($parent->getAttribute('class'));
+                $parentText = $this->normalizeText($parent->textContent);
+                $isCompactPromo = mb_strlen($parentText) <= 600 && $this->looksLikePromotionalCopy($parentText);
+
                 if (
                     str_contains($class, 'phone-container') ||
                     str_contains($class, 'hidden-lg') ||
                     str_contains($class, 'cta') ||
-                    $this->looksLikePromotionalCopy($this->normalizeText($parent->textContent))
+                    $isCompactPromo
                 ) {
                     $best = $parent;
                 }
