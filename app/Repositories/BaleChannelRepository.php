@@ -36,10 +36,10 @@ class BaleChannelRepository
     }
 
     /**
-     * Token consumption و اتصال chat_id در یک Transaction انجام می‌شوند تا Token
-     * در صورت شکست اتصال، مصرف‌شده باقی نماند.
+     * Token مصرف و chat_id در یک Transaction ثبت می‌شوند.
+     * اگر اتصال chat fail شود، used_at هم rollback می‌شود و Token بی‌دلیل نمی‌سوزد.
      */
-    public function consumeAndConnect(string $tokenHash, string $chatId): ?int
+    public function connectWithToken(string $tokenHash, string $chatId, string $now): ?int
     {
         $pdo = Database::connection();
         $pdo->beginTransaction();
@@ -49,12 +49,15 @@ class BaleChannelRepository
                 'SELECT id, user_id FROM bale_link_tokens
                  WHERE token_hash = :token_hash
                    AND used_at IS NULL
-                   AND expires_at > NOW()
+                   AND expires_at > :now
                  ORDER BY id DESC
                  LIMIT 1
                  FOR UPDATE'
             );
-            $stmt->execute(['token_hash' => $tokenHash]);
+            $stmt->execute([
+                'token_hash' => $tokenHash,
+                'now' => $now,
+            ]);
             $row = $stmt->fetch();
 
             if (!$row) {
@@ -62,7 +65,6 @@ class BaleChannelRepository
                 return null;
             }
 
-            $userId = (int) $row['user_id'];
             $connect = $pdo->prepare(
                 'INSERT INTO bale_user_channels (user_id, chat_id, is_active)
                  VALUES (:user_id, :chat_id, 1)
@@ -72,13 +74,21 @@ class BaleChannelRepository
                     connected_at = CURRENT_TIMESTAMP,
                     updated_at = CURRENT_TIMESTAMP'
             );
-            $connect->execute(['user_id' => $userId, 'chat_id' => $chatId]);
+            $connect->execute([
+                'user_id' => $row['user_id'],
+                'chat_id' => $chatId,
+            ]);
 
-            $update = $pdo->prepare('UPDATE bale_link_tokens SET used_at = NOW() WHERE id = :id');
-            $update->execute(['id' => $row['id']]);
+            $update = $pdo->prepare(
+                'UPDATE bale_link_tokens SET used_at = :used_at WHERE id = :id'
+            );
+            $update->execute([
+                'used_at' => $now,
+                'id' => $row['id'],
+            ]);
 
             $pdo->commit();
-            return $userId;
+            return (int) $row['user_id'];
         } catch (\Throwable $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
