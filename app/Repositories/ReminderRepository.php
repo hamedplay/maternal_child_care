@@ -44,33 +44,37 @@ class ReminderRepository
     }
 
     /** @return array<int,array<string,mixed>> */
-    public function findDue(int $limit = 100): array
+    public function findDue(string $now, int $limit = 100): array
     {
         $limit = max(1, min($limit, 500));
         try {
-            $stmt = Database::connection()->query(
+            $stmt = Database::connection()->prepare(
                 "SELECT r.id, r.user_id, r.reminder_type, r.title, r.notes, r.event_at, r.remind_at,
                         b.chat_id
                  FROM reminders r
                  INNER JOIN bale_user_channels b ON b.user_id = r.user_id AND b.is_active = 1
-                 WHERE r.status = 'pending' AND r.remind_at <= NOW()
+                 WHERE r.status = 'pending' AND r.remind_at <= :now
                  ORDER BY r.remind_at ASC, r.id ASC
                  LIMIT {$limit}"
             );
+            $stmt->execute(['now' => $now]);
             return $stmt->fetchAll();
         } catch (PDOException $e) {
             return [];
         }
     }
 
-    public function markSent(int $id): void
+    public function markSent(int $id, string $sentAt): void
     {
         $stmt = Database::connection()->prepare(
             "UPDATE reminders
-             SET status = 'sent', sent_at = NOW(), attempts = attempts + 1, last_error = NULL
+             SET status = 'sent', sent_at = :sent_at, attempts = attempts + 1, last_error = NULL
              WHERE id = :id AND status = 'pending'"
         );
-        $stmt->execute(['id' => $id]);
+        $stmt->execute([
+            'sent_at' => $sentAt,
+            'id' => $id,
+        ]);
     }
 
     public function markFailedAttempt(int $id, string $error, int $maxAttempts = 3): void
