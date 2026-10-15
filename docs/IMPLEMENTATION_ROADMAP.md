@@ -96,25 +96,19 @@
 - ایجاد `tools/crawlers/import_cdc_milestones.php` برای Reviewed Persian JSON.
 - Importer دارای validation، `--dry-run`، Transaction و duplicate check است.
 - ایجاد `ChildCareRepository` برای Data Access صفحات کودک.
-- تکمیل پنج لینک از قبل موجود منوی کودک:
-  - `growth.php`
-  - `vaccine.php`
-  - `child-nutrition.php`
-  - `milestones.php`
-  - `conditions.php`
-- CSS مشترک Child pages ایجاد شد.
-- مکمل‌های کودک در صفحه تغذیه بر اساس سن نمایش داده می‌شوند.
+- تکمیل پنج لینک منوی کودک: growth، vaccine، child-nutrition، milestones، conditions.
+- CSS مشترک Child pages.
 
-مسیر داده Crawler:
+مسیر داده:
 
 `CDC → Raw JSON → ترجمه/بازبینی → Reviewed JSON → Import → development_milestones`
 
 باقی‌مانده محیط اجرا:
 
 - اجرای crawler روی سرور دارای اینترنت.
-- بازبینی/ترجمه محتوای Raw.
+- بازبینی/ترجمه Raw.
 - اجرای Importer روی DB واقعی.
-- تست Browser صفحات Child علیه DB واقعی.
+- تست Browser صفحات Child.
 
 جزئیات: `MCC-CHANGE-008`, `MCC-CHANGE-010`.
 
@@ -126,19 +120,18 @@
 
 انجام‌شده:
 
-- بررسی HTML واقعی Dump و شناسایی `install-inline`, `install-screenshot`, landing/install URLs و app screenshots.
-- ایجاد `ArticleContentSanitizer`.
-- حذف فقط CTA/بلوک/تصویر تبلیغاتی؛ لینک‌های محتوایی عادی `gahvare.net/articles/...` کورکورانه حذف نمی‌شوند.
-- استفاده از Sanitizer قبل از نمایش مقاله و excerpt مقالات مرتبط.
-- افزودن Data Access لازم برای cleanup به `ArticleRepository`.
-- ایجاد `tools/cleanup_gahvare_article_ads.php` با `--dry-run` و `--apply` و Transaction.
+- شناسایی الگوهای تبلیغ از HTML واقعی Dump.
+- `ArticleContentSanitizer` برای CTA/تصویر/app landing گهواره.
+- حفظ لینک‌های محتوایی عادی گهواره.
+- Sanitizer قبل از نمایش Article و excerpt.
+- ابزار `tools/cleanup_gahvare_article_ads.php` با `--dry-run` و `--apply` و Transaction.
 
 باقی‌مانده محیط اجرا:
 
-1. اجرای `php tools/cleanup_gahvare_article_ads.php --dry-run`.
-2. بررسی تعداد/نمونه رکوردهای تغییرکرده.
-3. اجرای `php tools/cleanup_gahvare_article_ads.php --apply` روی DB واقعی.
-4. تست چند Article واقعی در Browser.
+1. Dry Run روی DB واقعی.
+2. بررسی نمونه‌ها.
+3. Apply.
+4. Browser validation.
 
 جزئیات: `MCC-CHANGE-011`.
 
@@ -146,23 +139,38 @@
 
 # فاز ۶ — Profile، User Data، Logging و Personalization
 
-**وضعیت: مرحله بعد**
+**وضعیت: پیاده‌سازی اصلی انجام‌شده؛ Migration و Browser/DB validation واقعی باقی مانده است**
 
-Scope:
+انجام‌شده:
 
-- کامل‌تر شدن پروفایل.
-- ورود داده‌های شخصی موردنیاز بعد از Login.
-- ذخیره تعاملات در DB در محدوده درخواست اولیه.
-- Personalization.
-- پیشنهاد Article/FAQ بر اساس نیاز کاربر.
+- Migration جدید `20261015_002_create_user_profiles_and_activity.sql`.
+- جدول `user_profiles` برای stage، تاریخ تولد، تاریخ تقریبی زایمان و اطلاعات پایه کودک.
+- جدول `user_activity_logs` برای ثبت Requestهای کاربر لاگین‌شده.
+- Activity logging مرکزی از Bootstrap؛ payload، OTP و query string ذخیره نمی‌شوند.
+- `UserProfileRepository` و `UserProfileService`.
+- ذخیره Profile داخل Transaction تا update نیمه‌کاره ایجاد نشود.
+- صفحه `profile.php` و لینک آن در منوی حساب.
+- Personalization بر اساس stage و تاریخ‌های Profile.
+- `RecommendationService` بر اساس Profile + مسیرهای اخیر.
+- پیشنهاد Article براساس taxonomy واقعی Article categories.
+- پیشنهاد FAQ براساس taxonomy واقعی FAQ categories.
+- Quick Link خودکار برای هفته بارداری یا سن کودک (رشد، تغذیه، تکامل، واکسن).
+- AI chat persistence از فاز ۳ نیز بخشی از تاریخچه تعامل کاربر است.
 
-نکته: ذخیره AI chat در فاز ۳ انجام شد چون بخشی از همان Pipeline بود.
+باقی‌مانده محیط اجرا:
+
+- اجرای Migration 002 روی MariaDB واقعی.
+- تست Save/Reload پروفایل.
+- تست Activity Log بعد از Login.
+- تست Recommendation با stageهای مختلف و تاریخ واقعی.
+
+جزئیات Change: `MCC-CHANGE-012`.
 
 ---
 
 # فاز ۷ — Doctor Contact و Reminder با Bale
 
-**وضعیت: برنامه‌ریزی‌شده**
+**وضعیت: مرحله بعد**
 
 - ارتباط با پزشک مشابه Support با Workflow مخصوص.
 - appointment/medication reminder.
