@@ -639,11 +639,193 @@ Workflow قبلی Change 004 حفظ شد:
 
 ---
 
+## MCC-CHANGE-010 — تکمیل Child/Infant UI و Importer محتوای بازبینی‌شده
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+در Header پروژه منوی «کودک» از قبل پنج لینک داشت، اما فایل‌های مقصد وجود نداشتند و کاربر عملاً با 404 مواجه می‌شد. همچنین Crawler CDC Raw Export تولید می‌کرد ولی مرحله Import محتوای ترجمه/بازبینی‌شده هنوز پیاده‌سازی نشده بود.
+
+### وضعیت قبل
+
+- `growth.php` وجود نداشت.
+- `vaccine.php` وجود نداشت.
+- `child-nutrition.php` وجود نداشت.
+- `milestones.php` وجود نداشت.
+- `conditions.php` وجود نداشت.
+- برای nutrition/supplement/vaccination/conditions Repository صفحه‌محور مستقلی وجود نداشت.
+- مسیر `CDC → Raw JSON → Reviewed Persian → DB` در مرحله Import ناقص بود.
+
+### تغییرات
+
+#### Data Access
+فایل `app/Repositories/ChildCareRepository.php` اضافه شد و فقط Data Access جداول زیر را انجام می‌دهد:
+
+- `child_nutrition`
+- `child_supplements`
+- `vaccination_schedule`
+- `common_conditions`
+
+Repositoryهای موجود `GrowthStandardRepository` و `DevelopmentMilestoneRepository` دوباره استفاده شدند و SQL آن‌ها تکرار نشد.
+
+#### UI
+پنج صفحه‌ای که Header از قبل به آن‌ها لینک می‌داد ساخته شدند:
+
+- `public/growth.php`
+- `public/vaccine.php`
+- `public/child-nutrition.php`
+- `public/milestones.php`
+- `public/conditions.php`
+
+صفحات سن‌محور Query Parameter را به بازه مجاز محدود می‌کنند و تمام متن DB با `htmlspecialchars` نمایش داده می‌شود.
+
+صفحه تغذیه علاوه بر stage غذایی، مکمل‌های مرتبط با همان سن را نیز از جدول واقعی `child_supplements` نمایش می‌دهد.
+
+CSS مشترک `public/assets/css/pages/child-care.css` اضافه شد تا صفحات Child بدون کپی چندباره Style پایه مشترک داشته باشند.
+
+#### Importer
+فایل `tools/crawlers/import_cdc_milestones.php` اضافه شد.
+
+Importer فقط Reviewed JSON با فیلدهای فارسی را قبول می‌کند و این موارد را Validate می‌کند:
+
+- `milestone_name_fa`
+- `description_fa`
+- category مجاز طبق enum واقعی DB
+- milestone_type مجاز طبق enum واقعی DB
+- بازه سن
+- CDC source URL
+
+دو حالت دارد:
+
+`--dry-run` → فقط Validation، بدون تغییر DB.
+
+اجرای بدون dry-run → Import داخل Transaction، با duplicate check و Rollback در خطا.
+
+### Before → After
+
+**Before:** منوی Child ظاهراً وجود داشت ولی لینک‌ها عملاً مرده بودند و Crawler فقط Raw Export داشت.
+
+**After:** Child section صفحات واقعی متصل به DB دارد و Pipeline محتوا تا Reviewed Import تکمیل شده است.
+
+### Validation
+
+- وجود لینک‌های Child در Header بررسی شد.
+- نبود فایل‌های مقصد با پاسخ 404 تأیید شد.
+- Schemaهای واقعی Child از Dump مبنای Queryها قرار گرفتند.
+- enumهای `development_milestones` مستقیماً از Dump برای Importer استفاده شدند.
+- فایل‌های جدید بعد از Commit از `main` بازخوانی شدند.
+- اجرای Browser/DB واقعی این صفحات و اجرای Import واقعی در این محیط انجام نشده است؛ بنابراین Runtime Success روی سرور واقعی هنوز باید Validate شود.
+
+### Rollback
+حذف صفحات Child، CSS، `ChildCareRepository` و Importer اثر این Change را برمی‌گرداند. Schema دیتابیس تغییر نکرده است.
+
+### نتیجه نهایی
+منوی Child اکنون به صفحات واقعی متصل است و مسیر Crawler از Raw Source تا Import کنترل‌شده محتوای فارسی کامل شده است.
+
+---
+
+## MCC-CHANGE-011 — حذف تبلیغات گهواره از HTML مقالات
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+کاربر صریحاً خواسته بود تبلیغات گهواره از مقالات Crawl‌شده حذف شوند؛ شامل CTA نصب اپ، تصاویر تبلیغاتی و بلوک‌های تبلیغی، در حالی که HTML محتوایی مقاله حفظ شود.
+
+### شواهد از دیتابیس واقعی
+در Dump واقعی صدها occurrence از «گهواره» و تعداد زیادی occurrence از «نصب اپلیکیشن» وجود دارد. نمونه واقعی شامل این الگوها بود:
+
+- `id="install-inline"`
+- `gahvare.net/landing?...`
+- متن `نصب اپلیکیشن گهواره`
+- بلوک `hidden-lg hidden-md` با phone mockup
+- تصویر `gahvare.net/assets/images/home_screen/...`
+- `id="install-screenshot"`
+- لینک `/i/...?...article_app_screen`
+
+در همان مقاله لینک‌های محتوایی عادی به `gahvare.net/articles/...` نیز وجود داشتند؛ بنابراین حذف تمام لینک‌های دامنه گهواره صحیح نبود.
+
+### طراحی
+فایل `app/Services/ArticleContentSanitizer.php` ایجاد شد.
+
+Sanitizer به‌صورت هدفمند موارد زیر را حذف می‌کند:
+
+- شناسه‌های تبلیغاتی `install-inline` و `install-screenshot`
+- install/landing URLهای گهواره
+- CTAهای متنی نصب/دانلود اپلیکیشن گهواره
+- تصاویر app/home-screen گهواره
+- بلوک‌های کوچک محلی که صریحاً promotional copy اپلیکیشن دارند
+
+اما لینک‌های عادی `gahvare.net/articles/...` به‌عنوان محتوای مقاله کورکورانه حذف نمی‌شوند.
+
+### جلوگیری از حذف بیش‌ازحد
+در Validation مشخص شد wrapper بزرگ DOM نیز می‌تواند متن تبلیغاتی را در `textContent` خود داشته باشد. برای جلوگیری از حذف کل Article:
+
+- wrapper اصلی صریحاً از حذف مستثنی شد.
+- heuristic متنی فقط روی بلوک‌های محلی حداکثر ۶۰۰ کاراکتر اعمال می‌شود.
+- بالا رفتن در DOM قبل از `article/body/html/root` متوقف می‌شود.
+
+### نمایش مقاله
+`public/article.php` اکنون قبل از Security Sanitization فعلی، `ArticleContentSanitizer` را اجرا می‌کند. همچنین excerpt مقالات مرتبط نیز از محتوای پاک‌شده ساخته می‌شود.
+
+این یعنی حتی قبل از اجرای Cleanup دائمی DB، CTA تبلیغاتی شناخته‌شده نباید در صفحه Article نمایش داده شود.
+
+### Cleanup دائمی DB
+به `ArticleRepository` فقط متدهای Data Access زیر اضافه شدند:
+
+- `allForContentCleanup()`
+- `updateContent()`
+
+Business Logic پاک‌سازی وارد Repository نشده است.
+
+ابزار زیر ایجاد شد:
+
+`tools/cleanup_gahvare_article_ads.php`
+
+حالت‌ها:
+
+```bash
+php tools/cleanup_gahvare_article_ads.php --dry-run
+php tools/cleanup_gahvare_article_ads.php --apply
+```
+
+Dry Run تعداد Articleهای نیازمند تغییر و اندازه قبل/بعد را نمایش می‌دهد ولی DB را تغییر نمی‌دهد.
+
+`--apply` تغییرات را داخل Transaction ذخیره می‌کند و در خطا Rollback انجام می‌دهد.
+
+### Before → After
+
+**Before:** HTML تبلیغ گهواره داخل `articles.content` ذخیره و توسط صفحه Article نمایش داده می‌شد.
+
+**After:** نمایش مقاله Sanitizer اختصاصی دارد و ابزار مستقل برای حذف دائمی تبلیغ از رکوردهای فعلی DB وجود دارد.
+
+### Validation
+
+- الگوهای Sanitizer از HTML واقعی Dump استخراج شدند، نه بر اساس حدس.
+- تفاوت بین لینک محتوایی و لینک install/landing در طراحی رعایت شد.
+- edge case حذف wrapper بزرگ Article شناسایی و قبل از نهایی‌سازی اصلاح شد.
+- Service و callerها بعد از Commit از `main` بازخوانی شدند.
+- Cleanup `--apply` روی DB واقعی از این محیط اجرا نشده است؛ بنابراین تعداد واقعی رکوردهای تغییرکرده هنوز باید با Dry Run روی سرور مشخص شود.
+
+### Rollback
+
+- برای Runtime display: حذف استفاده از `ArticleContentSanitizer` در `article.php`.
+- برای Cleanup Tool: حذف `tools/cleanup_gahvare_article_ads.php` و متدهای cleanup Repository.
+- اگر Cleanup روی DB واقعی اجرا شده باشد، Rollback داده‌ای نیازمند Backup/Export قبل از Apply است؛ ابزار عمداً Dry Run را به‌عنوان قدم اول ارائه می‌دهد.
+
+### نتیجه نهایی
+فاز حذف تبلیغات گهواره در کد پیاده‌سازی شده است؛ باقی‌مانده فقط اجرای Dry Run/Apply و Validation روی دیتابیس و Browser محیط واقعی است.
+
+---
+
 ## وضعیت ادامه کار
 
-بعد از MCC-CHANGE-009:
+بعد از MCC-CHANGE-011:
 
 - Phase 1 انجام شده است.
-- Phase 2 از نظر کد و Error Handling رسمی Kavenegar انجام شده و فقط Validation واقعی SMS به credential/Template/حساب محیط اجرا وابسته است.
-- Phase 3 بخش اصلی AI/RAG را پیاده‌سازی کرده و Migration باید روی DB واقعی اجرا شود.
-- Phase 4 شروع شده و Crawler CDC موجود است؛ مرحله بعد Import محتوای بازبینی‌شده و ساخت Child/Infant UI مشابه Pregnancy است.
+- Phase 2 از نظر کد انجام شده؛ تست واقعی SMS وابسته به Kavenegar credential است.
+- Phase 3 بخش اصلی انجام شده؛ Migration AI و E2E باید روی محیط واقعی اجرا شوند.
+- Phase 4 کد Crawler/Importer و Child UI انجام شده؛ Crawl/Import/Browser Validation واقعی باقی مانده است.
+- Phase 5 کد Sanitizer/Cleanup انجام شده؛ Dry Run و Apply روی DB واقعی باقی مانده است.
+- Phase 6 مرحله بعد توسعه است: Profile، User Data، Logging و Personalization.
