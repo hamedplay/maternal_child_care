@@ -4,6 +4,7 @@ require_once __DIR__ . '/../config/config.php';
 
 use App\Repositories\ArticleRepository;
 use App\Repositories\CategoryRepository;
+use App\Services\ArticleContentSanitizer;
 
 $activePage = 'articles';
 
@@ -26,7 +27,8 @@ if ($article === null) {
  */
 function art_excerpt(string $content, int $length = 100): string
 {
-    $plain = trim(preg_replace('/\s+/u', ' ', strip_tags($content)));
+    $cleaned = (new ArticleContentSanitizer())->removeGahvareAds($content);
+    $plain = trim(preg_replace('/\s+/u', ' ', strip_tags($cleaned)));
     if (mb_strlen($plain) <= $length) {
         return $plain;
     }
@@ -44,12 +46,14 @@ function art_persian_date(string $datetime): string
 }
 
 /**
- * پاک‌سازی امنیتی HTML مقاله (که از یک کرالر خارجی میاد، نه از فرم کاربر خودمون).
- * فقط تگ‌های رایج محتوا رو نگه می‌داره، اسکریپت/آی‌فریم/فرم رو کامل حذف می‌کنه،
- * و attributeهای خطرناک (onclick و مشابه، href با javascript:) رو از تگ‌های مجاز پاک می‌کنه.
+ * پاک‌سازی محتوایی + امنیتی HTML مقاله.
+ * ابتدا CTA/تبلیغ گهواره حذف می‌شود؛ سپس فقط تگ‌های محتوایی مجاز می‌مانند و
+ * attributeهای اجرایی/URL خطرناک پاک می‌شوند.
  */
 function art_sanitize_html(string $html): string
 {
+    $html = (new ArticleContentSanitizer())->removeGahvareAds($html);
+
     $allowedTags = '<p><br><strong><b><em><i><u><h1><h2><h3><h4><h5><h6>'
         . '<ul><ol><li><a><img><blockquote><span><div>'
         . '<table><thead><tbody><tr><td><th><figure><figcaption>';
@@ -86,7 +90,6 @@ function art_sanitize_html(string $html): string
             }
         }
 
-        // لینک‌های داخل مقاله رو امن‌تر باز می‌کنیم
         if ($node->nodeName === 'a' && $node->hasAttribute('href')) {
             $node->setAttribute('rel', 'noopener noreferrer nofollow');
             $node->setAttribute('target', '_blank');
@@ -129,22 +132,13 @@ function art_sanitize_html(string $html): string
     </section>
 
     <?php if ($article === null): ?>
-
-        <!-- ============================================================
-        مقاله پیدا نشد
-        ============================================================ -->
         <section class="artd-notfound-section">
             <div class="artd-notfound-box">
                 <p>این مقاله پیدا نشد یا حذف شده.</p>
                 <a href="articles.php" class="btn-primary">بازگشت به مقالات</a>
             </div>
         </section>
-
     <?php else: ?>
-
-        <!-- ============================================================
-        بردکرامب
-        ============================================================ -->
         <section class="artd-breadcrumb-section">
             <div class="artd-breadcrumb">
                 <a href="index.php">خانه</a>
@@ -157,9 +151,6 @@ function art_sanitize_html(string $html): string
             </div>
         </section>
 
-        <!-- ============================================================
-        بنر کاور + عنوان
-        ============================================================ -->
         <section class="artd-cover-section">
             <img src="<?= htmlspecialchars($article['cover_image'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($article['title'], ENT_QUOTES, 'UTF-8') ?>" class="artd-cover-image" />
         </section>
@@ -182,9 +173,6 @@ function art_sanitize_html(string $html): string
             </div>
         </article>
 
-        <!-- ============================================================
-        CTA بازاریابی
-        ============================================================ -->
         <section class="artd-cta-section">
             <div class="artd-cta-box">
                 <p>
@@ -195,9 +183,6 @@ function art_sanitize_html(string $html): string
             </div>
         </section>
 
-        <!-- ============================================================
-        مقالات مرتبط
-        ============================================================ -->
         <?php if (!empty($relatedArticles)): ?>
             <section class="artd-related-section">
                 <h2 class="artd-related-title">مقالات مرتبط</h2>
@@ -220,7 +205,6 @@ function art_sanitize_html(string $html): string
                 </div>
             </section>
         <?php endif; ?>
-
     <?php endif; ?>
 
     <?php include TEMPLATES_PATH . '/partials/footer.php'; ?>
