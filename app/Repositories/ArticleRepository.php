@@ -59,9 +59,6 @@ class ArticleRepository
         }
     }
 
-    /**
-     * چند مقاله‌ی مرتبط از همون دسته‌بندی (برای پایین صفحه‌ی مقاله).
-     */
     public function findRelated(int $categoryId, int $excludeId, int $limit = 4): array
     {
         try {
@@ -71,6 +68,45 @@ class ArticleRepository
                  ORDER BY created_at DESC LIMIT ' . max(1, $limit)
             );
             $stmt->execute(['category' => $categoryId, 'exclude' => $excludeId]);
+
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * مقالات فعال در دسته‌های واقعی دیتابیس برای Recommender.
+     * @param string[] $categorySlugs
+     */
+    public function findRecommendedByCategorySlugs(array $categorySlugs, int $limit = 6): array
+    {
+        $categorySlugs = array_values(array_unique(array_filter(array_map('strval', $categorySlugs))));
+        if ($categorySlugs === []) {
+            return [];
+        }
+
+        $limit = max(1, min($limit, 20));
+        $placeholders = [];
+        $params = [];
+        foreach ($categorySlugs as $i => $slug) {
+            $key = 'slug_' . $i;
+            $placeholders[] = ':' . $key;
+            $params[$key] = $slug;
+        }
+
+        try {
+            $stmt = Database::connection()->prepare(
+                'SELECT a.id, a.title, a.slug, a.cover_image, a.content,
+                        c.name AS category_name, c.slug AS category_slug
+                 FROM articles a
+                 INNER JOIN categories c ON c.id = a.category AND c.type = \'article\'
+                 WHERE a.is_active = 1
+                   AND c.slug IN (' . implode(', ', $placeholders) . ')
+                 ORDER BY a.updated_at DESC, a.id DESC
+                 LIMIT ' . $limit
+            );
+            $stmt->execute($params);
 
             return $stmt->fetchAll();
         } catch (PDOException $e) {
