@@ -25,12 +25,21 @@ class KavenegarService
         return $this->apiKey !== '';
     }
 
-    public function sendOtp(string $phone, string $code): bool
+    /**
+     * ارسال OTP و برگرداندن نتیجه ساختاریافته برای AuthService.
+     *
+     * @return array{success:bool, status:?int, message:string, transport_error?:bool}
+     */
+    public function sendOtp(string $phone, string $code): array
     {
         // حالت توسعه: اگر API Key تنظیم نشده باشد پیامک واقعی ارسال نمی‌شود.
         if ($this->apiKey === '') {
             error_log("[KavenegarService] DEV MODE (بدون API key) - کد {$phone}: {$code}");
-            return true;
+            return [
+                'success' => true,
+                'status' => 200,
+                'message' => 'dev-mode',
+            ];
         }
 
         $url = sprintf(
@@ -53,22 +62,52 @@ class KavenegarService
 
         $response = curl_exec($ch);
         $curlError = curl_error($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         if ($response === false) {
-            error_log('[KavenegarService] خطای cURL: ' . $curlError);
-            return false;
+            error_log('[KavenegarService] خطای ارتباط با API: ' . $curlError);
+            return [
+                'success' => false,
+                'status' => null,
+                'message' => 'خطا در ارتباط با سرویس پیامک.',
+                'transport_error' => true,
+            ];
         }
 
         $data = json_decode($response, true);
-        $status = $data['return']['status'] ?? null;
-
-        if ($httpCode !== 200 || $status !== 200) {
-            error_log('[KavenegarService] ارسال ناموفق: ' . $response);
-            return false;
+        if (!is_array($data)) {
+            error_log('[KavenegarService] پاسخ JSON نامعتبر از API. HTTP=' . $httpCode);
+            return [
+                'success' => false,
+                'status' => null,
+                'message' => 'پاسخ نامعتبر از سرویس پیامک.',
+            ];
         }
 
-        return true;
+        $status = isset($data['return']['status']) ? (int) $data['return']['status'] : null;
+        $message = trim((string) ($data['return']['message'] ?? ''));
+
+        if ($httpCode !== 200 || $status !== 200) {
+            // عمداً کل response لاگ نمی‌شود تا receptor/token/message وارد لاگ نشوند.
+            error_log(sprintf(
+                '[KavenegarService] ارسال OTP ناموفق. HTTP=%d STATUS=%s MESSAGE=%s',
+                $httpCode,
+                $status === null ? 'null' : (string) $status,
+                $message !== '' ? $message : '-'
+            ));
+
+            return [
+                'success' => false,
+                'status' => $status,
+                'message' => $message !== '' ? $message : 'ارسال پیامک ناموفق بود.',
+            ];
+        }
+
+        return [
+            'success' => true,
+            'status' => 200,
+            'message' => $message !== '' ? $message : 'تایید شد',
+        ];
     }
 }
