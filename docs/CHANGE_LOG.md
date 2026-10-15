@@ -276,6 +276,150 @@ Validation این مرحله شامل بررسی ایجاد شدن فایل در
 
 ---
 
+## MCC-CHANGE-001 — اصلاح Roadmap و قفل کردن Scope روی درخواست اولیه
+
+### تاریخ
+
+2026-10-15
+
+### درخواست / مسئله
+
+کاربر تصریح کرد که هیچ تغییر یا Feature خارج از درخواست اولیه نباید انجام شود. Roadmap اولیه علاوه بر نیازهای کاربر، چند فعالیت عمومی مثل Audit گسترده، Hardening مستقل و برخی استانداردسازی‌های عمومی را به عنوان فاز مستقل در نظر گرفته بود.
+
+### وضعیت قبل از تغییر
+
+`docs/IMPLEMENTATION_ROADMAP.md` دارای Phase 0 عمومی برای Audit/Security/Baseline و برخی کارهای جانبی بود که الزام مستقیم درخواست اولیه نبودند.
+
+### هدف
+
+تبدیل Roadmap به نقشه اجرای دقیق همان نیازهای اعلام‌شده توسط کاربر و جلوگیری از Scope Creep.
+
+### Root Cause
+
+Not Applicable — این تغییر اصلاح برنامه اجرا بر اساس Scope نهایی کاربر است.
+
+### تصمیم فنی
+
+فازهای عمومی حذف شدند و نقشه راه بر اساس Featureهای صریح کاربر بازچینی شد: AI/RAG و جداسازی Data Access، OTP/Kavenegar، محتوای Infant/Child و Crawler/پاک‌سازی گهواره، Profile/Personalization، Doctor Contact/Reminder و Admin Panel.
+
+### فایل‌های تغییرکرده
+
+- `docs/IMPLEMENTATION_ROADMAP.md`
+
+### Before → After
+
+**Before:** Roadmap شامل فعالیت‌های عمومی خارج از Featureهای اولیه نیز بود.
+
+**After:** هر فاز مستقیماً به یکی از نیازهای اولیه کاربر متصل است و در سند صراحتاً نوشته شده Refactor یا Feature جانبی بدون ارتباط مستقیم انجام نشود.
+
+### Validation / Test
+
+محتوای Roadmap بعد از Update از شاخه `main` بازخوانی و Scopeهای جدید با درخواست اولیه و Dump واقعی دیتابیس تطبیق داده شد.
+
+### Rollback
+
+بازگرداندن Commit مربوط به Roadmap نسخه قبلی را برمی‌گرداند و اثری روی Runtime ندارد.
+
+### نتیجه نهایی
+
+Roadmap اکنون Scope-locked است و مبنای ادامه توسعه فقط نیازهای اولیه کاربر است.
+
+---
+
+## MCC-CHANGE-002 — شروع فاز 1: ایجاد مرز Query Preprocessing و Knowledge Retrieval
+
+### تاریخ
+
+2026-10-15
+
+### درخواست / مسئله
+
+در درخواست اولیه، جداسازی دسترسی دیتابیس از منطق AI، تغییر بخش Keyword Processing و ایجاد Retriever مستقل خواسته شده بود. در ساختار قبلی endpoint مستقیماً `AiKnowledgeRepository` را صدا می‌زد و Repository همزمان preprocessing و retrieval/SQL را انجام می‌داد.
+
+### وضعیت قبل از تغییر
+
+مسیر قبلی:
+
+`public/ai-qa-ask.php → AiKnowledgeRepository::search(question) → LlmService`
+
+`AiKnowledgeRepository` علاوه بر queryهای دیتابیس، normalize/keyword/age/gender extraction، scoring و context formatting را نیز انجام می‌دهد.
+
+### هدف
+
+شروع جداسازی به صورت مرحله‌ای و بدون تغییر رفتار فعلی Retrieval. در اولین گام باید endpoint از Repository مستقل شود و یک مرز اختصاصی Retriever و Preprocessor به وجود بیاید.
+
+### Root Cause
+
+Not Applicable — این تغییر Refactor مستقیم مورد درخواست کاربر است.
+
+### تصمیم فنی
+
+به جای بازنویسی یک‌باره `AiKnowledgeRepository`، جداسازی در چند گام انجام می‌شود تا امکان Validation هر مرحله وجود داشته باشد. در این گام دو Service جدید ایجاد شدند و endpoint فقط به Retriever وابسته شد.
+
+### فایل‌های تغییرکرده
+
+#### Added
+
+- `app/Services/QueryPreprocessor.php` — نرمال‌سازی حروف فارسی/عربی، اعداد فارسی/عربی و نیم‌فاصله.
+- `app/Services/KnowledgeRetriever.php` — مرز Retrieval بین endpoint و Repository.
+
+#### Updated
+
+- `public/ai-qa-ask.php` — جایگزینی وابستگی مستقیم `AiKnowledgeRepository` با `KnowledgeRetriever`.
+
+### Before → After
+
+**Before**
+
+`Endpoint → AiKnowledgeRepository → LlmService`
+
+**After**
+
+`Endpoint → KnowledgeRetriever → QueryPreprocessor → AiKnowledgeRepository → LlmService`
+
+در این مرحله رفتار SQL و Context فعلی عمداً تغییر نکرده است. انتقال کامل keyword extraction/scoring/context building از Repository به Service در گام بعدی فاز 1 انجام می‌شود.
+
+### جزئیات پیاده‌سازی
+
+1. `QueryPreprocessor::normalize()` اضافه شد.
+2. حروف عربی `ي/ى/ك` به `ی/ی/ک` تبدیل می‌شوند.
+3. اعداد فارسی و عربی به اعداد لاتین تبدیل می‌شوند تا تشخیص سن پایدارتر باشد.
+4. نیم‌فاصله به فاصله تبدیل و فاصله‌های تکراری یکدست می‌شوند.
+5. `KnowledgeRetriever::retrieve()` ورودی کاربر را normalize می‌کند و سپس Retrieval موجود را فراخوانی می‌کند.
+6. endpoint دیگر Repository را instantiate نمی‌کند.
+
+### اثر روی بخش‌های دیگر
+
+UI، دیتابیس، Kavenegar، Profile، Crawler و سایر Featureها در این Change دست‌نخورده‌اند.
+
+### ملاحظات امنیتی
+
+این Change هیچ credential یا secret جدیدی اضافه نکرده است.
+
+### ملاحظات Performance
+
+فقط یک مرحله `strtr` و normalize سبک قبل از Retrieval اضافه شده است؛ Queryهای دیتابیس و تعداد context blockها تغییر نکرده‌اند.
+
+### Validation / Test
+
+- PSR-4 پروژه بررسی شد و namespace `App\Services` به صورت خودکار از `app/Services` بارگذاری می‌شود.
+- `config/config.php` نیز fallback autoloader برای `App\` دارد؛ بنابراین فایل‌های Service جدید بدون تغییر Composer قابل resolve هستند.
+- فایل‌های ایجادشده از `main` بازخوانی شدند و dependencyهای آن‌ها بررسی شدند.
+- Endpoint بعد از Update از `KnowledgeRetriever` استفاده می‌کند.
+- تست Runtime/LLM واقعی در این مرحله از محیط GitHub Connector قابل اجرا نیست؛ بنابراین رفتار شبکه OpenRouter هنوز به عنوان Validation عملی تأیید نشده است.
+
+### Rollback
+
+1. `public/ai-qa-ask.php` به استفاده مستقیم از `AiKnowledgeRepository` برگردد.
+2. `app/Services/KnowledgeRetriever.php` حذف شود.
+3. `app/Services/QueryPreprocessor.php` حذف شود.
+
+### نتیجه نهایی
+
+فاز 1 شروع شده و اولین boundary لازم برای جداسازی AI Logic از Data Access ایجاد شده است، بدون دست‌زدن به Featureهای خارج از Scope.
+
+---
+
 ## قواعد ادامه کار
 
 برای جلوگیری از تبدیل این فایل به یک Changelog مبهم، موارد زیر رعایت می‌شوند:
