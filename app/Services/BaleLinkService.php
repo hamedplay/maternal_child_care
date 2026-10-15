@@ -45,15 +45,22 @@ class BaleLinkService
             return false;
         }
 
-        $userId = $this->repository->consumeLinkToken(hash('sha256', strtoupper($matches[1])));
+        try {
+            $userId = $this->repository->consumeAndConnect(
+                hash('sha256', strtoupper($matches[1])),
+                (string) $chatId
+            );
+        } catch (\Throwable $e) {
+            error_log('BaleLinkService::processWebhookUpdate خطا: ' . $e->getMessage());
+            return false;
+        }
+
         if ($userId === null) {
             $this->bale->sendMessage((string) $chatId, 'کد اتصال نامعتبر یا منقضی شده است. از سایت یک کد جدید بگیرید.');
             return false;
         }
 
-        $this->repository->connect($userId, (string) $chatId);
         $this->bale->sendMessage((string) $chatId, 'حساب بله با موفقیت به سامانه مراقبت مادر و کودک متصل شد. یادآوری‌های فعال از اینجا ارسال می‌شوند.');
-
         return true;
     }
 
