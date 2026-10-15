@@ -8,6 +8,7 @@ $isPregnancyActive = in_array($activePage, $pregnancyPages, true);
 $isChildActive = in_array($activePage, $childPages, true);
 
 $isLoggedIn = isset($_SESSION['user_id']);
+$isAdmin = $isLoggedIn && (new \App\Repositories\AdminRepository())->isAdmin((int) $_SESSION['user_id']);
 $userFullName = $_SESSION['user_full_name'] ?? null;
 $userPhoneDisplay = '';
 if ($isLoggedIn && !empty($_SESSION['user_phone'])) {
@@ -59,10 +60,7 @@ if ($isLoggedIn && !empty($_SESSION['user_phone'])) {
         <?php if ($isLoggedIn): ?>
             <div class="profile-menu" id="profileMenu">
                 <button type="button" class="profile-icon" id="profileMenuTrigger" aria-label="حساب کاربری" aria-expanded="false">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                     <span class="profile-online-dot"></span>
                 </button>
                 <div class="profile-dropdown" id="profileDropdown" hidden>
@@ -76,15 +74,12 @@ if ($isLoggedIn && !empty($_SESSION['user_phone'])) {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2" /><path d="M11 18h2" /></svg>
                         <bdi dir="ltr"><?= htmlspecialchars($userPhoneDisplay, ENT_QUOTES, 'UTF-8') ?></bdi>
                     </div>
-                    <a href="profile.php" class="profile-dropdown-link">
-                        <span>پروفایل من</span>
-                    </a>
-                    <a href="doctor-contact.php" class="profile-dropdown-link">
-                        <span>ارتباط با پزشک</span>
-                    </a>
-                    <a href="reminders.php" class="profile-dropdown-link">
-                        <span>یادآوری‌ها</span>
-                    </a>
+                    <a href="profile.php" class="profile-dropdown-link"><span>پروفایل من</span></a>
+                    <a href="doctor-contact.php" class="profile-dropdown-link"><span>ارتباط با پزشک</span></a>
+                    <a href="reminders.php" class="profile-dropdown-link"><span>یادآوری‌ها</span></a>
+                    <?php if ($isAdmin): ?>
+                        <a href="admin.php" class="profile-dropdown-link"><span>پنل مدیریت</span></a>
+                    <?php endif; ?>
                     <a href="auth-logout.php" class="profile-dropdown-logout">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /></svg>
                         خروج از حساب
