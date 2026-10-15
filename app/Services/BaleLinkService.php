@@ -46,9 +46,10 @@ class BaleLinkService
         }
 
         try {
-            $userId = $this->repository->consumeAndConnect(
+            $userId = $this->repository->connectWithToken(
                 hash('sha256', strtoupper($matches[1])),
-                (string) $chatId
+                (string) $chatId,
+                date('Y-m-d H:i:s')
             );
         } catch (\Throwable $e) {
             error_log('BaleLinkService::processWebhookUpdate خطا: ' . $e->getMessage());
