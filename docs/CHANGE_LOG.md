@@ -249,6 +249,108 @@ Repository اکنون فقط متدهای Data Access دارد، از جمله:
 
 ---
 
+## MCC-CHANGE-004 — شروع فاز ۲: اصلاح چرخه OTP و اتصال صریح Kavenegar SMS
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+در درخواست اولیه، Login/Register با OTP کاوه‌نگار خواسته شده بود و لازم بود کدی که برای کاربر ارسال می‌شود در سمت سرور قابل verify باشد.
+
+بررسی واقعی نشان داد زیرساخت اصلی از قبل وجود دارد: `AuthService`، `OtpRepository`، `KavenegarService`، endpointهای send/verify، UI مربوط به OTP و جدول `otp_verifications` در دیتابیس.
+
+### وضعیت قبل از تغییر
+چرخه `requestOtp()` به این ترتیب بود:
+
+1. تولید OTP و hash.
+2. invalidate کردن OTP قبلی.
+3. ثبت OTP جدید در DB.
+4. تلاش برای ارسال SMS با Kavenegar.
+
+این ترتیب یک مشکل مستقیم داشت: اگر Kavenegar خطا می‌داد، OTP قبلی کاربر از قبل باطل شده بود و OTP جدیدی که هرگز به کاربر نرسیده بود در دیتابیس فعال باقی می‌ماند. همان رکورد می‌توانست cooldown و rate-limit را هم فعال کند.
+
+### Root Cause
+Persistence و invalidate شدن OTP قبل از مشخص‌شدن نتیجه ارسال Provider انجام می‌شد.
+
+### هدف
+فقط OTPای در دیتابیس به‌عنوان کد قابل verify ثبت شود که مرحله ارسال آن موفق بوده باشد؛ در صورت خطای Provider، وضعیت قبلی کاربر خراب نشود.
+
+### فایل‌های تغییرکرده
+
+#### Updated — `app/Services/AuthService.php`
+ترتیب عملیات `requestOtp()` تغییر کرد.
+
+**Before**
+
+`generate → invalidate old → persist new → send SMS`
+
+**After**
+
+`generate → send SMS → invalidate old → persist new`
+
+اگر `sendOtp()` خطا بدهد، هیچ OTP قبلی invalidate نمی‌شود و هیچ OTP ارسال‌نشده در DB ثبت نمی‌شود.
+
+ذخیره plaintext OTP اضافه نشد. verify همچنان با `HMAC-SHA256` و `hash_equals()` انجام می‌شود که نیاز «وجود کد در سمت سرور برای بررسی» را بدون نگهداری متن خام OTP پوشش می‌دهد.
+
+#### Updated — `app/Services/KavenegarService.php`
+پارامتر زیر به Verify Lookup اضافه شد:
+
+`type=sms`
+
+تا channel موردنیاز کاربر به‌صورت صریح SMS باشد.
+
+### تطبیق با Kavenegar
+مسیر استفاده‌شده همان Verify Lookup کاوه‌نگار است و پارامترهای اصلی `receptor`، `token`، `template` و `type` با مستندات/API فعلی این سرویس مطابقت دارند.
+
+### وضعیت Configuration
+
+کلید و Template از این متغیرهای محیطی خوانده می‌شوند:
+
+- `KAVENEGAR_API_KEY`
+- `KAVENEGAR_OTP_TEMPLATE`
+
+در صورت نبود API Key، حالت Development موجود پروژه حفظ شده و `debug_code` فقط برای تست محلی برگردانده می‌شود.
+
+### دیتابیس
+Dump واقعی تأیید کرد جدول `otp_verifications` ستون‌های زیر را برای همین workflow دارد:
+
+- `phone`
+- `code_hash`
+- `attempts`
+- `max_attempts`
+- `is_verified`
+- `is_invalidated`
+- `expires_at`
+- `verified_at`
+- `ip_address`
+- `created_at`
+
+بنابراین برای این اصلاح Schema جدیدی لازم نبود.
+
+### UI / Endpoint
+
+- `auth-modal.js` به `auth-send-otp.php` و `auth-verify-otp.php` وصل است.
+- `auth-send-otp.php` از `AuthService::requestOtp()` استفاده می‌کند.
+- `auth-verify-otp.php` بعد از verify موفق session کاربر را ایجاد می‌کند.
+
+در این Change UI تغییر نکرد، چون wiring موجود با نیاز فعلی سازگار بود.
+
+### Validation / Test
+
+1. Schema واقعی OTP از Dump دیتابیس بررسی شد.
+2. endpointهای send و verify و UI واقعی خوانده شدند و مسیر کامل درخواست تأیید شد.
+3. مستندات/نمونه‌های فعلی Kavenegar Verify Lookup بررسی شد و پارامترهای استفاده‌شده با آن سازگارند.
+4. نسخه اصلاح‌شده منطق `AuthService` با `php -l` بررسی شد و خطای Syntax نداشت.
+5. ارسال SMS واقعی تست نشده، چون API Key و Template واقعی محیط اجرا در اختیار این Validation نیستند.
+
+### Rollback
+برای بازگشت، `AuthService.php` و `KavenegarService.php` به نسخه قبل از MCC-CHANGE-004 برگردند.
+
+### نتیجه نهایی
+کد OTP/Kavenegar از نظر workflow آماده است و مشکل خراب‌شدن OTP در خطای ارسال اصلاح شده است. تکمیل Validation فاز ۲ به تنظیم credential واقعی Kavenegar و اجرای تست End-to-End وابسته است.
+
+---
+
 ## قواعد ادامه کار
 
 برای ادامه پروژه:
