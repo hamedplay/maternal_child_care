@@ -55,11 +55,15 @@ class AuthService
 
         /*
          * اول ارسال واقعی انجام می‌شود و فقط در صورت موفقیت، OTP جدید در DB ثبت می‌شود.
-         * دلیل: اگر Kavenegar خطا بدهد، نباید کد قبلی کاربر invalidate شود یا یک OTP
+         * اگر Kavenegar خطا بدهد، نباید کد قبلی کاربر invalidate شود یا یک OTP
          * ارسال‌نشده باعث cooldown/rate-limit شود.
          */
-        if (!$this->kavenegar->sendOtp($phone, $code)) {
-            return ['success' => false, 'error' => 'ارسال پیامک با خطا مواجه شد. لطفاً دوباره تلاش کنید.'];
+        $sendResult = $this->kavenegar->sendOtp($phone, $code);
+        if (!$sendResult['success']) {
+            return [
+                'success' => false,
+                'error' => $this->otpSendErrorMessage($sendResult),
+            ];
         }
 
         // فقط بعد از ارسال موفق، کدهای قبلی باطل و کد جدید قابل verify می‌شود.
@@ -131,6 +135,30 @@ class AuthService
         $user = $this->userRepository->findById($userId);
 
         return ['success' => true, 'user' => $user];
+    }
+
+    /**
+     * تبدیل خطای فنی Kavenegar به پیام قابل فهم برای UI.
+     * جزئیات کامل provider در KavenegarService لاگ می‌شود و API Key هرگز در خروجی نیست.
+     */
+    private function otpSendErrorMessage(array $sendResult): string
+    {
+        if (!empty($sendResult['transport_error'])) {
+            return 'ارتباط با سرویس پیامک برقرار نشد. لطفاً دوباره تلاش کنید.';
+        }
+
+        $status = $sendResult['status'] ?? null;
+
+        return match ($status) {
+            401, 403 => 'تنظیمات سرویس پیامک معتبر نیست. لطفاً با پشتیبانی سامانه تماس بگیرید.',
+            411 => 'شماره موبایل توسط سرویس پیامک معتبر شناخته نشد.',
+            418 => 'اعتبار سرویس پیامک کافی نیست. لطفاً با پشتیبانی سامانه تماس بگیرید.',
+            424 => 'الگوی پیامک تایید پیدا نشد یا هنوز تایید نشده است.',
+            426 => 'سرویس اعتبارسنجی پیامک روی حساب فعال نیست.',
+            409, 429, 451 => 'سرویس پیامک موقتاً در دسترس نیست. لطفاً کمی بعد دوباره تلاش کنید.',
+            422, 431, 432 => 'تنظیمات پیامک تایید نیاز به بررسی دارد. لطفاً با پشتیبانی سامانه تماس بگیرید.',
+            default => 'ارسال پیامک با خطا مواجه شد. لطفاً دوباره تلاش کنید.',
+        };
     }
 
     private function isValidPhone(string $phone): bool
