@@ -6,9 +6,6 @@ use App\Repositories\AiKnowledgeRepository;
 
 /**
  * مسئول orchestration فرآیند Retrieval برای RAG.
- *
- * این کلاس سؤال preprocess‌شده را می‌گیرد، candidateها را از Repository می‌خواند،
- * scoring/ranking انجام می‌دهد و در نهایت context blockهای آماده برای LlmService می‌سازد.
  */
 class KnowledgeRetriever
 {
@@ -23,9 +20,6 @@ class KnowledgeRetriever
         $this->queryPreprocessor = $queryPreprocessor ?? new QueryPreprocessor();
     }
 
-    /**
-     * @return string[]
-     */
     public function retrieve(string $question, int $perTableLimit = 2): array
     {
         $analysis = $this->queryPreprocessor->analyze($question);
@@ -42,6 +36,17 @@ class KnowledgeRetriever
         if (!empty($keywords)) {
             $blocks = array_merge($blocks, $this->retrieveFaqs($keywords, $perTableLimit));
             $blocks = array_merge($blocks, $this->retrieveArticles($keywords, $perTableLimit));
+            $blocks = array_merge($blocks, $this->retrieveCommonConditions($keywords, $perTableLimit));
+        }
+
+        // منابع سن‌محور کودک؛ در صورت نبود سن از keyword fallback استفاده می‌کنند.
+        $blocks = array_merge($blocks, $this->retrieveChildNutrition($keywords, $perTableLimit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveChildSupplements($keywords, $perTableLimit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveVaccinations($keywords, $perTableLimit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveMilestones($keywords, $perTableLimit, $ageMonths));
+        $blocks = array_merge($blocks, $this->retrieveGrowth($ageMonths, $gender));
+
+        if (!empty($keywords)) {
             $blocks = array_merge($blocks, $this->retrieveNutrition($keywords, $perTableLimit));
             $blocks = array_merge($blocks, $this->retrieveWeeks($keywords, $perTableLimit));
             $blocks = array_merge($blocks, $this->retrieveWarningSigns($keywords, $perTableLimit));
@@ -49,13 +54,9 @@ class KnowledgeRetriever
             $blocks = array_merge($blocks, $this->retrieveSupplements($keywords, $perTableLimit));
         }
 
-        $blocks = array_merge($blocks, $this->retrieveMilestones($keywords, $perTableLimit, $ageMonths));
-        $blocks = array_merge($blocks, $this->retrieveGrowth($ageMonths, $gender));
-
         return array_slice($blocks, 0, 12);
     }
 
-    /** @return string[] */
     private function retrieveFaqs(array $keywords, int $limit): array
     {
         $rows = $this->scoreAndLimit(
@@ -71,7 +72,6 @@ class KnowledgeRetriever
         );
     }
 
-    /** @return string[] */
     private function retrieveArticles(array $keywords, int $limit): array
     {
         $rows = $this->scoreAndLimit(
@@ -102,67 +102,83 @@ class KnowledgeRetriever
         return $blocks;
     }
 
-    /** @return string[] */
-    private function retrieveNutrition(array $keywords, int $limit): array
+    private function retrieveCommonConditions(array $keywords, int $limit): array
     {
+        if (empty($keywords)) {
+            return [];
+        }
+
         $rows = $this->scoreAndLimit(
-            $this->knowledgeRepository->findPregnancyNutrition($keywords),
+            $this->knowledgeRepository->findCommonConditions($keywords),
             $keywords,
-            ['nutrient_name', 'benefits', 'food_sources'],
-            $limit
-        );
-
-        return array_map(
-            static fn(array $row): string => "[تغذیه] {$row['nutrient_name']}: {$row['benefits']} | نیاز روزانه: {$row['daily_requirement']} | منابع غذایی: {$row['food_sources']}",
-            $rows
-        );
-    }
-
-    /** @return string[] */
-    private function retrieveWeeks(array $keywords, int $limit): array
-    {
-        $rows = $this->scoreAndLimit(
-            $this->knowledgeRepository->findPregnancyWeeks($keywords),
-            $keywords,
-            ['development_description', 'mother_changes', 'medical_tips'],
-            $limit
-        );
-
-        return array_map(
-            static fn(array $row): string => "[هفته {$row['week_number']} بارداری] رشد جنین: {$row['development_description']} | تغییرات مادر: {$row['mother_changes']} | توصیه پزشکی: {$row['medical_tips']}",
-            $rows
-        );
-    }
-
-    /** @return string[] */
-    private function retrieveWarningSigns(array $keywords, int $limit): array
-    {
-        $rows = $this->scoreAndLimit(
-            $this->knowledgeRepository->findPregnancyWarningSigns($keywords),
-            $keywords,
-            ['symptom_name', 'description', 'possible_causes', 'action_required'],
-            $limit
-        );
-
-        return array_map(
-            static fn(array $row): string => "[علامت هشدار - سطح {$row['urgency_level']}] {$row['symptom_name']}: {$row['description']} | اقدام لازم: {$row['action_required']}",
-            $rows
-        );
-    }
-
-    /** @return string[] */
-    private function retrieveExercises(array $keywords, int $limit): array
-    {
-        $rows = $this->scoreAndLimit(
-            $this->knowledgeRepository->findPregnancyExercises($keywords),
-            $keywords,
-            ['exercise_name', 'description', 'benefits', 'how_to_do'],
+            ['condition_name', 'description', 'symptoms', 'home_care', 'when_to_see_doctor', 'age_group'],
             $limit
         );
 
         $blocks = [];
         foreach ($rows as $row) {
-            $line = "[ورزش بارداری] {$row['exercise_name']}: {$row['description']} | فواید: {$row['benefits']} | نحوه انجام: {$row['how_to_do']}";
+            $blocks[] = "[بیماری/عارضه شایع کودک - {$row['age_group']}] {$row['condition_name']}: {$row['description']} "
+                . "| علائم: {$row['symptoms']} | مراقبت خانگی: {$row['home_care']} "
+                . "| زمان مراجعه به پزشک: {$row['when_to_see_doctor']}";
+        }
+
+        return $blocks;
+    }
+
+    private function retrieveChildNutrition(array $keywords, int $limit, ?int $ageMonths): array
+    {
+        if ($ageMonths !== null) {
+            $rows = $this->knowledgeRepository->findChildNutritionByAge($ageMonths, $limit);
+        } elseif (!empty($keywords)) {
+            $rows = $this->scoreAndLimit(
+                $this->knowledgeRepository->findChildNutritionByKeywords($keywords),
+                $keywords,
+                ['nutrition_stage', 'recommended_foods', 'foods_to_avoid', 'tips'],
+                $limit
+            );
+        } else {
+            return [];
+        }
+
+        $blocks = [];
+        foreach ($rows as $row) {
+            $line = "[تغذیه کودک، {$row['age_start_months']} تا {$row['age_end_months']} ماهگی] {$row['nutrition_stage']}: "
+                . "مواد توصیه‌شده: {$row['recommended_foods']} | وعده‌ها: {$row['meal_frequency']}";
+            if (!empty($row['foods_to_avoid'])) {
+                $line .= " | موارد پرهیز: {$row['foods_to_avoid']}";
+            }
+            if (!empty($row['tips'])) {
+                $line .= " | نکته: {$row['tips']}";
+            }
+            $blocks[] = $line;
+        }
+
+        return $blocks;
+    }
+
+    private function retrieveChildSupplements(array $keywords, int $limit, ?int $ageMonths): array
+    {
+        if ($ageMonths !== null) {
+            $rows = array_slice($this->knowledgeRepository->findChildSupplementsByAge($ageMonths), 0, $limit);
+        } elseif (!empty($keywords)) {
+            $rows = $this->scoreAndLimit(
+                $this->knowledgeRepository->findChildSupplementsByKeywords($keywords),
+                $keywords,
+                ['supplement_name', 'description', 'benefits', 'food_sources', 'precautions'],
+                $limit
+            );
+        } else {
+            return [];
+        }
+
+        $blocks = [];
+        foreach ($rows as $row) {
+            $ageEnd = $row['age_end_months'] === null ? 'به بعد' : 'تا ' . $row['age_end_months'] . ' ماهگی';
+            $line = "[مکمل کودک، از {$row['age_start_months']} ماهگی {$ageEnd}] {$row['supplement_name']}: {$row['description']} "
+                . "| فواید: {$row['benefits']}";
+            if (!empty($row['food_sources'])) {
+                $line .= " | منابع غذایی: {$row['food_sources']}";
+            }
             if (!empty($row['precautions'])) {
                 $line .= " | احتیاط: {$row['precautions']}";
             }
@@ -172,19 +188,27 @@ class KnowledgeRetriever
         return $blocks;
     }
 
-    /** @return string[] */
-    private function retrieveSupplements(array $keywords, int $limit): array
+    private function retrieveVaccinations(array $keywords, int $limit, ?int $ageMonths): array
     {
-        $rows = $this->scoreAndLimit(
-            $this->knowledgeRepository->findPregnancySupplements($keywords),
-            $keywords,
-            ['supplement_name', 'importance', 'precautions'],
-            $limit
-        );
+        if ($ageMonths !== null) {
+            $rows = array_slice($this->knowledgeRepository->findVaccinationsByAge($ageMonths), 0, $limit);
+        } elseif (!empty($keywords)) {
+            $rows = $this->scoreAndLimit(
+                $this->knowledgeRepository->findVaccinationsByKeywords($keywords),
+                $keywords,
+                ['vaccine_name', 'description', 'precautions'],
+                $limit
+            );
+        } else {
+            return [];
+        }
 
         $blocks = [];
         foreach ($rows as $row) {
-            $line = "[مکمل] {$row['supplement_name']}: {$row['importance']} | دوز مرجع: {$row['dosage']}";
+            $line = "[واکسیناسیون کودک، {$row['age_in_months']} ماهگی] {$row['vaccine_name']} - دوز {$row['dose_number']}";
+            if (!empty($row['description'])) {
+                $line .= ": {$row['description']}";
+            }
             if (!empty($row['precautions'])) {
                 $line .= " | احتیاط: {$row['precautions']}";
             }
@@ -194,7 +218,6 @@ class KnowledgeRetriever
         return $blocks;
     }
 
-    /** @return string[] */
     private function retrieveMilestones(array $keywords, int $limit, ?int $ageMonths): array
     {
         if ($ageMonths !== null) {
@@ -222,7 +245,6 @@ class KnowledgeRetriever
         return $blocks;
     }
 
-    /** @return string[] */
     private function retrieveGrowth(?int $ageMonths, ?string $gender): array
     {
         if ($ageMonths === null) {
@@ -243,12 +265,93 @@ class KnowledgeRetriever
         return $blocks;
     }
 
-    /**
-     * @param array<int, array<string, mixed>> $rows
-     * @param string[] $keywords
-     * @param string[] $textColumns
-     * @return array<int, array<string, mixed>>
-     */
+    private function retrieveNutrition(array $keywords, int $limit): array
+    {
+        $rows = $this->scoreAndLimit(
+            $this->knowledgeRepository->findPregnancyNutrition($keywords),
+            $keywords,
+            ['nutrient_name', 'benefits', 'food_sources'],
+            $limit
+        );
+
+        return array_map(
+            static fn(array $row): string => "[تغذیه بارداری] {$row['nutrient_name']}: {$row['benefits']} | نیاز روزانه: {$row['daily_requirement']} | منابع غذایی: {$row['food_sources']}",
+            $rows
+        );
+    }
+
+    private function retrieveWeeks(array $keywords, int $limit): array
+    {
+        $rows = $this->scoreAndLimit(
+            $this->knowledgeRepository->findPregnancyWeeks($keywords),
+            $keywords,
+            ['development_description', 'mother_changes', 'medical_tips'],
+            $limit
+        );
+
+        return array_map(
+            static fn(array $row): string => "[هفته {$row['week_number']} بارداری] رشد جنین: {$row['development_description']} | تغییرات مادر: {$row['mother_changes']} | توصیه پزشکی: {$row['medical_tips']}",
+            $rows
+        );
+    }
+
+    private function retrieveWarningSigns(array $keywords, int $limit): array
+    {
+        $rows = $this->scoreAndLimit(
+            $this->knowledgeRepository->findPregnancyWarningSigns($keywords),
+            $keywords,
+            ['symptom_name', 'description', 'possible_causes', 'action_required'],
+            $limit
+        );
+
+        return array_map(
+            static fn(array $row): string => "[علامت هشدار بارداری - سطح {$row['urgency_level']}] {$row['symptom_name']}: {$row['description']} | اقدام لازم: {$row['action_required']}",
+            $rows
+        );
+    }
+
+    private function retrieveExercises(array $keywords, int $limit): array
+    {
+        $rows = $this->scoreAndLimit(
+            $this->knowledgeRepository->findPregnancyExercises($keywords),
+            $keywords,
+            ['exercise_name', 'description', 'benefits', 'how_to_do'],
+            $limit
+        );
+
+        $blocks = [];
+        foreach ($rows as $row) {
+            $line = "[ورزش بارداری] {$row['exercise_name']}: {$row['description']} | فواید: {$row['benefits']} | نحوه انجام: {$row['how_to_do']}";
+            if (!empty($row['precautions'])) {
+                $line .= " | احتیاط: {$row['precautions']}";
+            }
+            $blocks[] = $line;
+        }
+
+        return $blocks;
+    }
+
+    private function retrieveSupplements(array $keywords, int $limit): array
+    {
+        $rows = $this->scoreAndLimit(
+            $this->knowledgeRepository->findPregnancySupplements($keywords),
+            $keywords,
+            ['supplement_name', 'importance', 'precautions'],
+            $limit
+        );
+
+        $blocks = [];
+        foreach ($rows as $row) {
+            $line = "[مکمل بارداری] {$row['supplement_name']}: {$row['importance']}";
+            if (!empty($row['precautions'])) {
+                $line .= " | احتیاط: {$row['precautions']}";
+            }
+            $blocks[] = $line;
+        }
+
+        return $blocks;
+    }
+
     private function scoreAndLimit(array $rows, array $keywords, array $textColumns, int $limit): array
     {
         $scored = [];
@@ -267,10 +370,7 @@ class KnowledgeRetriever
             }
 
             if ($score > 0) {
-                $scored[] = [
-                    'row' => $row,
-                    'score' => $score,
-                ];
+                $scored[] = ['row' => $row, 'score' => $score];
             }
         }
 
@@ -289,7 +389,6 @@ class KnowledgeRetriever
         return trim($text);
     }
 
-    /** @param string[] $keywords */
     private function extractRelevantSnippet(string $text, array $keywords, int $context = 300): string
     {
         $bestPos = null;
