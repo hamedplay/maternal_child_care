@@ -99,7 +99,16 @@ $statusLabels = [
                             — <?= htmlspecialchars($statusLabels[$row['status']] ?? $row['status'], ENT_QUOTES, 'UTF-8') ?>
                         </summary>
                         <p><?= nl2br(htmlspecialchars($row['message'], ENT_QUOTES, 'UTF-8')) ?></p>
-                        <p><small><?= htmlspecialchars($row['created_at'], ENT_QUOTES, 'UTF-8') ?></small></p>
+                        <?php if (!empty($row['reply_text'])): ?>
+                            <div class="profile-message success" style="margin-top:12px">
+                                <strong>پاسخ پزشک:</strong><br>
+                                <?= nl2br(htmlspecialchars($row['reply_text'], ENT_QUOTES, 'UTF-8')) ?>
+                                <?php if (!empty($row['replied_at'])): ?>
+                                    <br><small><?= htmlspecialchars($row['replied_at'], ENT_QUOTES, 'UTF-8') ?></small>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        <p><small>ثبت: <?= htmlspecialchars($row['created_at'], ENT_QUOTES, 'UTF-8') ?></small></p>
                     </details>
                 <?php endforeach; ?>
             </div>
