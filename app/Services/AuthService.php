@@ -30,7 +30,7 @@ class AuthService
 
     /**
      * درخواست ارسال کد تایید برای یک شماره.
-     * @return array{success: bool, error?: string}
+     * @return array{success: bool, error?: string, debug_code?: string}
      */
     public function requestOtp(string $phone): array
     {
@@ -53,18 +53,22 @@ class AuthService
         $expiresAt = date('Y-m-d H:i:s', time() + self::CODE_TTL_SECONDS);
         $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 
-        // کدهای فعال قبلیِ همین شماره رو باطل می‌کنیم تا فقط آخرین کد معتبر باشه
-        $this->otpRepository->invalidateActiveForPhone($phone);
-        $this->otpRepository->create($phone, $codeHash, $expiresAt, $ip);
-
+        /*
+         * اول ارسال واقعی انجام می‌شود و فقط در صورت موفقیت، OTP جدید در DB ثبت می‌شود.
+         * دلیل: اگر Kavenegar خطا بدهد، نباید کد قبلی کاربر invalidate شود یا یک OTP
+         * ارسال‌نشده باعث cooldown/rate-limit شود.
+         */
         if (!$this->kavenegar->sendOtp($phone, $code)) {
             return ['success' => false, 'error' => 'ارسال پیامک با خطا مواجه شد. لطفاً دوباره تلاش کنید.'];
         }
 
+        // فقط بعد از ارسال موفق، کدهای قبلی باطل و کد جدید قابل verify می‌شود.
+        $this->otpRepository->invalidateActiveForPhone($phone);
+        $this->otpRepository->create($phone, $codeHash, $expiresAt, $ip);
+
         $result = ['success' => true];
 
-        // فقط وقتی کاوه‌نگار هنوز وصل نیست، کد رو مستقیم برمی‌گردونیم تا بتونی تست کنی.
-        // به‌محض تنظیم کلید API واقعی، این بخش خودش غیرفعال می‌شه.
+        // فقط در حالت توسعه که API Key تنظیم نشده، کد برای تست به UI برگردانده می‌شود.
         if (!$this->kavenegar->isConfigured()) {
             $result['debug_code'] = $code;
         }
@@ -74,7 +78,7 @@ class AuthService
 
     /**
      * بررسی کد وارد‌شده و در صورت درست بودن، ورود/ثبت‌نام خودکار کاربر.
-     * @return array{success: bool, error?: string, user?: array}
+     * @return array{success: bool, error?: string, user?: array, is_new?: bool}
      */
     public function verifyOtp(string $phone, string $code): array
     {
