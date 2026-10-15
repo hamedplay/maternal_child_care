@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Core\Database;
 use App\Repositories\UserProfileRepository;
 use App\Repositories\UserRepository;
+use Throwable;
 
 class UserProfileService
 {
@@ -62,15 +64,31 @@ class UserProfileService
             return ['success' => false, 'error' => 'نام کودک معتبر نیست.'];
         }
 
-        $this->userRepository->updateName($userId, $name);
-        $this->profileRepository->upsert($userId, [
-            'stage' => $stage,
-            'birth_date' => $birthDate,
-            'pregnancy_due_date' => $dueDate,
-            'child_name' => $childName,
-            'child_birth_date' => $childBirthDate,
-            'child_gender' => $gender,
-        ]);
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $this->userRepository->updateName($userId, $name);
+            $this->profileRepository->upsert($userId, [
+                'stage' => $stage,
+                'birth_date' => $birthDate,
+                'pregnancy_due_date' => $dueDate,
+                'child_name' => $childName,
+                'child_birth_date' => $childBirthDate,
+                'child_gender' => $gender,
+            ]);
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('UserProfileService::save خطا: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'ذخیره پروفایل انجام نشد. اگر سامانه تازه به‌روزرسانی شده، Migration پروفایل باید روی دیتابیس اجرا شود.',
+            ];
+        }
 
         $_SESSION['user_full_name'] = $name;
         $this->activityService->record($userId, 'profile_updated', 'user_profile', (string) $userId);
