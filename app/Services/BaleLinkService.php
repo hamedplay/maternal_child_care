@@ -20,16 +20,14 @@ class BaleLinkService
     /** @return array{code:string,expires_at:string} */
     public function createCode(int $userId): array
     {
-        $code = strtoupper(bin2hex(random_bytes(4)));
+        $code = strtoupper(bin2hex(random_bytes(8)));
         $expiresAt = date('Y-m-d H:i:s', time() + self::TOKEN_TTL_SECONDS);
         $this->repository->createLinkToken($userId, hash('sha256', $code), $expiresAt);
 
         return ['code' => $code, 'expires_at' => $expiresAt];
     }
 
-    /**
-     * پردازش update استاندارد Bot API برای دستور /start CODE.
-     */
+    /** پردازش update استاندارد Bot API برای دستور /start CODE. */
     public function processWebhookUpdate(array $update): bool
     {
         $message = $update['message'] ?? null;
@@ -43,7 +41,7 @@ class BaleLinkService
             return false;
         }
 
-        if (!preg_match('/^\/start\s+([A-F0-9]{8})$/i', $text, $matches)) {
+        if (!preg_match('/^\/start\s+([A-F0-9]{16})$/i', $text, $matches)) {
             return false;
         }
 
