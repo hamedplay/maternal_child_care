@@ -404,6 +404,140 @@ RAG اکنون علاوه بر Pregnancy به داده‌های واقعی کو�
 
 ---
 
+## MCC-CHANGE-008 — شروع فاز محتوا: انتخاب CDC و ایجاد Crawler واقعی Developmental Milestones
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+در درخواست اولیه لازم بود بخش نوزاد/کودک با استفاده از یک منبع معتبر تکمیل شود و داده منبع واقعاً از طریق crawler دریافت شود. همچنین crawler code/export باید در پروژه وجود داشته باشد.
+
+### وضعیت قبل
+پروژه داده‌های کودک در DB داشت اما Crawler قابل اجرا برای منبع معتبر و Export قابل ردیابی داخل Repository وجود نداشت. صفحات Pregnancy در `public/` وجود دارند، اما Child section هم‌سطح آن هنوز کامل نشده است.
+
+### انتخاب منبع
+منبع اولیه برای Developmental Milestones:
+
+`Centers for Disease Control and Prevention (CDC) — Learn the Signs. Act Early.`
+
+دلیل انتخاب:
+
+1. منبع رسمی سلامت عمومی است.
+2. milestoneهای کودک را به تفکیک سن از ۲ ماه تا ۵ سال منتشر می‌کند.
+3. صفحات source تاریخ update/review دارند.
+4. robots.txt مسیر `/act-early/milestones/` را منع نکرده است.
+5. CDC اعلام می‌کند بیشتر محتوای متنی سایت public domain است، ولی Attribution و Non-endorsement باید رعایت شوند.
+
+### محدودیت استفاده از Assets
+Crawler فقط متن milestone را می‌گیرد. تصویر و ویدئو عمداً دانلود نمی‌شوند؛ زیرا CDC تصریح می‌کند بعضی تصاویر/assetها ممکن است copyright مستقل داشته باشند.
+
+### فایل جدید
+
+`tools/crawlers/cdc_milestones.php`
+
+### سن‌های Crawl
+
+- 2 ماه
+- 4 ماه
+- 6 ماه
+- 9 ماه
+- 12 ماه
+- 15 ماه
+- 18 ماه
+- 24 ماه
+- 30 ماه
+- 36 ماه
+- 48 ماه
+- 60 ماه
+
+### دسته‌بندی‌های Source
+Crawler headingهای CDC را به دسته خام تبدیل می‌کند:
+
+- `social_emotional`
+- `language_communication`
+- `cognitive`
+- `movement_physical`
+
+در این مرحله این categoryها مستقیم به enum دیتابیس تبدیل نمی‌شوند، چون mapping نهایی به `milestone_type` نیازمند بازبینی محتوایی است؛ برای مثال یک milestone حرکتی ممکن است fine motor یا gross motor باشد.
+
+### Export JSON
+به‌صورت پیش‌فرض فایل زیر ایجاد می‌شود:
+
+`storage/crawlers/cdc_milestones_YYYYmmdd_His.json`
+
+Metadata Export شامل:
+
+- source name
+- source pages
+- crawled_at
+- attribution
+- non-endorsement notice
+- records_count
+
+هر record شامل:
+
+- `source_name`
+- `source_url`
+- `age_months`
+- `source_category`
+- `milestone_text_en`
+
+### چرا Crawler مستقیم INSERT نمی‌کند؟
+CDC انگلیسی است و دیتابیس/رابط پروژه فارسی است. اگر Crawler مستقیماً INSERT کند، Raw Source انگلیسی وارد داده محصول می‌شود.
+
+مسیر صحیح این فاز:
+
+`CDC → Raw Crawler Export → ترجمه/بازبینی → Import → development_milestones`
+
+این جداسازی برای خود Feature crawler لازم است و یک معماری اضافه خارج از Scope نیست؛ چون باید provenance منبع و داده نهایی فارسی از هم قابل تشخیص باشند.
+
+### مستند اجرا
+فایل زیر اضافه شد:
+
+`tools/crawlers/README.md`
+
+شامل:
+
+- دلیل انتخاب CDC
+- نحوه اجرا
+- PHP extensionهای لازم (`curl`, `dom`)
+- فرمت Export
+- Attribution
+- توضیح اینکه تصویر/ویدئو Crawl نمی‌شوند
+
+### رفتار Crawler
+
+- فقط از CLI اجرا می‌شود.
+- HTTP status و cURL error را بررسی می‌کند.
+- بین درخواست‌ها delay قرار می‌دهد.
+- milestoneها را از H3های دسته‌بندی و List Itemها استخراج می‌کند.
+- noiseهای navigation/download حذف می‌شوند.
+- رکوردهای تکراری در هر Export deduplicate می‌شوند.
+
+### Validation
+
+- صفحات فعلی CDC Milestones برای ۲ ماه تا ۵ سال بررسی شدند و ساختار سنی منبع تأیید شد.
+- صفحه نمونه ۲ ماه دسته‌های Social/Emotional، Language/Communication، Cognitive و Movement/Physical را نمایش می‌دهد و طراحی parser بر همان ساختار واقعی انجام شد.
+- robots.txt فعلی CDC بررسی شد و مسیر source در Disallowهای عمومی نیست.
+- سیاست رسمی CDC برای reuse بررسی شد؛ Attribution و non-endorsement در Export/README ثبت شده است.
+- Crawler از داخل این محیط روی شبکه واقعی اجرا نشده است؛ بنابراین فایل Export واقعی هنوز تولید و commit نشده و موفقیت runtime crawl ادعا نمی‌شود.
+
+### Rollback
+حذف دو فایل زیر تمام اثر runtime این Change را برمی‌گرداند؛ هیچ DB schema یا داده اصلی در این Change تغییر نکرده است:
+
+- `tools/crawlers/cdc_milestones.php`
+- `tools/crawlers/README.md`
+
+### نتیجه نهایی
+پروژه اکنون Crawler مستقل و قابل اجرا برای یک منبع پزشکی معتبر دارد و خروجی Raw آن provenance کامل برای مرحله ترجمه/بازبینی و Import آینده نگه می‌دارد.
+
+---
+
 ## وضعیت ادامه کار
 
-بعد از MCC-CHANGE-007، بخش معماری و بخش مهمی از RAG اولیه انجام شده است. کارهای باقی‌مانده فقط طبق Roadmap Scope-locked ادامه پیدا می‌کنند؛ از جمله اجرای Migration در محیط واقعی، E2E credential tests و سپس فاز محتوای Infant/Child و Crawler.
+بعد از MCC-CHANGE-008:
+
+- Phase 1 انجام شده است.
+- Phase 2 از نظر کد آماده و تست واقعی Kavenegar وابسته به credential محیط اجرا است.
+- Phase 3 بخش اصلی AI/RAG را پیاده‌سازی کرده و Migration باید روی DB واقعی اجرا شود.
+- Phase 4 شروع شده و Crawler CDC موجود است؛ مرحله بعد Import محتوای بازبینی‌شده و ساخت Child/Infant UI مشابه Pregnancy است.
