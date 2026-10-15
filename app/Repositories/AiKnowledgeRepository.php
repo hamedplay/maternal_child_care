@@ -14,9 +14,6 @@ use PDOException;
  */
 class AiKnowledgeRepository
 {
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findFaqs(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -28,9 +25,6 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findArticles(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -46,9 +40,6 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findPregnancyNutrition(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -61,9 +52,6 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findPregnancyWeeks(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -76,9 +64,6 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findPregnancyWarningSigns(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -91,9 +76,6 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findPregnancyExercises(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -106,9 +88,6 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findPregnancySupplements(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -121,9 +100,123 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
+    public function findChildNutritionByAge(int $ageMonths, int $limit = 5): array
+    {
+        try {
+            $stmt = Database::connection()->prepare(
+                'SELECT nutrition_stage, age_start_months, age_end_months, recommended_foods,
+                        foods_to_avoid, meal_frequency, tips
+                 FROM child_nutrition
+                 WHERE age_start_months <= :age AND age_end_months >= :age
+                 ORDER BY age_start_months
+                 LIMIT :limit'
+            );
+            $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('AiKnowledgeRepository::findChildNutritionByAge خطا: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function findChildNutritionByKeywords(array $keywords, int $candidateLimit = 20): array
+    {
+        return $this->findByKeywords(
+            'SELECT nutrition_stage, age_start_months, age_end_months, recommended_foods,
+                    foods_to_avoid, meal_frequency, tips
+             FROM child_nutrition WHERE %s LIMIT %d',
+            ['nutrition_stage', 'recommended_foods', 'foods_to_avoid', 'tips'],
+            $keywords,
+            $candidateLimit,
+            'findChildNutritionByKeywords'
+        );
+    }
+
+    public function findChildSupplementsByAge(int $ageMonths, int $limit = 10): array
+    {
+        try {
+            $stmt = Database::connection()->prepare(
+                'SELECT supplement_name, description, benefits, dosage, age_start_months,
+                        age_end_months, daily_requirement, food_sources, precautions, is_essential
+                 FROM child_supplements
+                 WHERE age_start_months <= :age
+                   AND (age_end_months IS NULL OR age_end_months >= :age)
+                 ORDER BY is_essential DESC, age_start_months
+                 LIMIT :limit'
+            );
+            $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('AiKnowledgeRepository::findChildSupplementsByAge خطا: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function findChildSupplementsByKeywords(array $keywords, int $candidateLimit = 20): array
+    {
+        return $this->findByKeywords(
+            'SELECT supplement_name, description, benefits, dosage, age_start_months,
+                    age_end_months, daily_requirement, food_sources, precautions, is_essential
+             FROM child_supplements WHERE %s LIMIT %d',
+            ['supplement_name', 'description', 'benefits', 'food_sources', 'precautions'],
+            $keywords,
+            $candidateLimit,
+            'findChildSupplementsByKeywords'
+        );
+    }
+
+    public function findCommonConditions(array $keywords, int $candidateLimit = 20): array
+    {
+        return $this->findByKeywords(
+            'SELECT condition_name, description, symptoms, home_care, when_to_see_doctor, age_group
+             FROM common_conditions WHERE %s LIMIT %d',
+            ['condition_name', 'description', 'symptoms', 'home_care', 'when_to_see_doctor', 'age_group'],
+            $keywords,
+            $candidateLimit,
+            'findCommonConditions'
+        );
+    }
+
+    public function findVaccinationsByAge(int $ageMonths, int $limit = 10): array
+    {
+        try {
+            $stmt = Database::connection()->prepare(
+                'SELECT vaccine_name, description, dose_number, age_in_months,
+                        age_min_months, age_max_months, precautions
+                 FROM vaccination_schedule
+                 WHERE (age_min_months IS NOT NULL AND age_max_months IS NOT NULL
+                        AND age_min_months <= :age AND age_max_months >= :age)
+                    OR age_in_months = :age
+                 ORDER BY age_in_months, dose_number
+                 LIMIT :limit'
+            );
+            $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('AiKnowledgeRepository::findVaccinationsByAge خطا: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function findVaccinationsByKeywords(array $keywords, int $candidateLimit = 20): array
+    {
+        return $this->findByKeywords(
+            'SELECT vaccine_name, description, dose_number, age_in_months,
+                    age_min_months, age_max_months, precautions
+             FROM vaccination_schedule WHERE %s LIMIT %d',
+            ['vaccine_name', 'description', 'precautions'],
+            $keywords,
+            $candidateLimit,
+            'findVaccinationsByKeywords'
+        );
+    }
+
     public function findMilestonesByAge(int $ageMonths, int $limit = 2): array
     {
         try {
@@ -137,7 +230,6 @@ class AiKnowledgeRepository
             $stmt->bindValue(':age', $ageMonths, PDO::PARAM_INT);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
-
             return $stmt->fetchAll();
         } catch (PDOException $e) {
             error_log('AiKnowledgeRepository::findMilestonesByAge خطا: ' . $e->getMessage());
@@ -145,9 +237,6 @@ class AiKnowledgeRepository
         }
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findMilestonesByKeywords(array $keywords, int $candidateLimit = 20): array
     {
         return $this->findByKeywords(
@@ -160,9 +249,6 @@ class AiKnowledgeRepository
         );
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public function findGrowthByAgeAndGender(int $ageMonths, ?string $gender = null): array
     {
         try {
@@ -182,7 +268,6 @@ class AiKnowledgeRepository
                     'gender' => $currentGender,
                     'age' => $ageMonths,
                 ]);
-
                 $row = $stmt->fetch();
                 if ($row) {
                     $rows[] = $row;
@@ -196,11 +281,6 @@ class AiKnowledgeRepository
         }
     }
 
-    /**
-     * @param string[] $columns
-     * @param string[] $keywords
-     * @return array<int, array<string, mixed>>
-     */
     private function findByKeywords(
         string $sqlTemplate,
         array $columns,
@@ -220,7 +300,6 @@ class AiKnowledgeRepository
 
             $stmt = Database::connection()->prepare($sql);
             $stmt->execute($params);
-
             return $stmt->fetchAll();
         } catch (PDOException $e) {
             error_log('AiKnowledgeRepository::' . $operation . ' خطا: ' . $e->getMessage());
@@ -228,10 +307,6 @@ class AiKnowledgeRepository
         }
     }
 
-    /**
-     * @param string[] $columns
-     * @param string[] $keywords
-     */
     private function buildLikeClause(array $columns, array $keywords, array &$params): string
     {
         $conditions = [];
