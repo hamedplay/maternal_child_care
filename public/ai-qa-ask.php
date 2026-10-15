@@ -5,7 +5,6 @@ require_once __DIR__ . '/../config/config.php';
 use App\Services\KnowledgeRetriever;
 use App\Services\LlmService;
 
-session_start();
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -33,10 +32,10 @@ if (!isset($_SESSION['ai_chat_history']) || !is_array($_SESSION['ai_chat_history
     $_SESSION['ai_chat_history'] = [];
 }
 
-$aiConfig   = require BASE_PATH . '/config/ai.php';
+$aiConfig = require BASE_PATH . '/config/ai.php';
 $maxHistory = $aiConfig['max_history_messages'];
 
-// فقط N پیام آخر رو برای context به مدل می‌فرستیم (کنترل هزینه و طول درخواست)
+// فقط N پیام آخر برای context مدل ارسال می‌شود.
 $recentHistory = array_slice($_SESSION['ai_chat_history'], -$maxHistory);
 
 $knowledgeRetriever = new KnowledgeRetriever();
@@ -48,7 +47,6 @@ $answer = $llmService->ask($question, $contextBlocks, $recentHistory);
 $_SESSION['ai_chat_history'][] = ['role' => 'user', 'content' => $question];
 $_SESSION['ai_chat_history'][] = ['role' => 'assistant', 'content' => $answer];
 
-// جلوگیری از رشد بی‌نهایت session روی مرورگرهایی که خیلی وقت باز می‌مونن
 if (count($_SESSION['ai_chat_history']) > 40) {
     $_SESSION['ai_chat_history'] = array_slice($_SESSION['ai_chat_history'], -40);
 }
