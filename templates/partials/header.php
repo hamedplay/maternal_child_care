@@ -68,42 +68,32 @@ if ($isLoggedIn && !empty($_SESSION['user_phone'])) {
                 <div class="profile-dropdown" id="profileDropdown" hidden>
                     <?php if ($userFullName): ?>
                         <div class="profile-dropdown-name">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
-                            </svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                             <span><?= htmlspecialchars($userFullName, ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
                     <?php endif; ?>
                     <div class="profile-dropdown-phone">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="6" y="2" width="12" height="20" rx="2" />
-                            <path d="M11 18h2" />
-                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2" /><path d="M11 18h2" /></svg>
                         <bdi dir="ltr"><?= htmlspecialchars($userPhoneDisplay, ENT_QUOTES, 'UTF-8') ?></bdi>
                     </div>
                     <a href="profile.php" class="profile-dropdown-link">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                        </svg>
-                        پروفایل من
+                        <span>پروفایل من</span>
+                    </a>
+                    <a href="doctor-contact.php" class="profile-dropdown-link">
+                        <span>ارتباط با پزشک</span>
+                    </a>
+                    <a href="reminders.php" class="profile-dropdown-link">
+                        <span>یادآوری‌ها</span>
                     </a>
                     <a href="auth-logout.php" class="profile-dropdown-logout">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <path d="m16 17 5-5-5-5" />
-                            <path d="M21 12H9" />
-                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /></svg>
                         خروج از حساب
                     </a>
                 </div>
             </div>
         <?php else: ?>
             <a href="#" class="profile-icon" id="authModalTrigger" aria-label="ورود یا ثبت‌نام">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                </svg>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
             </a>
         <?php endif; ?>
     </div>
