@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/../config/config.php';
 
+use App\Services\ArticleContentSanitizer;
+use App\Services\RecommendationService;
 use App\Services\UserProfileService;
 
 if (!isset($_SESSION['user_id'])) {
@@ -29,10 +31,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $data = $service->get($userId);
 $user = $data['user'] ?? [];
 $profile = $data['profile'] ?? [];
+$recommendations = (new RecommendationService())->forUser($userId);
+$articleSanitizer = new ArticleContentSanitizer();
 
 $stage = $profile['stage'] ?? 'planning';
 $childGender = $profile['child_gender'] ?? 'unknown';
 $pageTitle = 'پروفایل من | مراقبت مادر و کودک';
+
+function profile_excerpt(string $html, ArticleContentSanitizer $sanitizer, int $length = 130): string
+{
+    $plain = strip_tags($sanitizer->removeGahvareAds($html));
+    $plain = trim(preg_replace('/\s+/u', ' ', $plain) ?? $plain);
+
+    return mb_strlen($plain) > $length ? mb_substr($plain, 0, $length) . '…' : $plain;
+}
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -130,6 +142,65 @@ $pageTitle = 'پروفایل من | مراقبت مادر و کودک';
 
         <p class="profile-note">شماره موبایل از سیستم ورود OTP می‌آید و در این صفحه قابل تغییر نیست.</p>
     </section>
+
+    <?php if (!empty($recommendations['quick_links'])): ?>
+        <section class="profile-recommendation-section">
+            <div class="profile-recommendation-heading">
+                <div>
+                    <h2>دسترسی سریع برای شما</h2>
+                    <p><?= htmlspecialchars($recommendations['reason'], ENT_QUOTES, 'UTF-8') ?></p>
+                </div>
+            </div>
+            <div class="profile-quick-grid">
+                <?php foreach ($recommendations['quick_links'] as $link): ?>
+                    <a class="profile-quick-card" href="<?= htmlspecialchars($link['url'], ENT_QUOTES, 'UTF-8') ?>">
+                        <strong><?= htmlspecialchars($link['label'], ENT_QUOTES, 'UTF-8') ?></strong>
+                        <span><?= htmlspecialchars($link['description'], ENT_QUOTES, 'UTF-8') ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($recommendations['articles'])): ?>
+        <section class="profile-recommendation-section">
+            <div class="profile-recommendation-heading">
+                <div>
+                    <h2>مقالات پیشنهادی</h2>
+                    <p><?= htmlspecialchars($recommendations['reason'], ENT_QUOTES, 'UTF-8') ?> و موضوعاتی که اخیراً دیده‌اید.</p>
+                </div>
+                <a href="articles.php">همه مقالات</a>
+            </div>
+            <div class="profile-recommendation-grid">
+                <?php foreach ($recommendations['articles'] as $article): ?>
+                    <a class="profile-recommendation-card" href="article.php?slug=<?= urlencode($article['slug']) ?>">
+                        <span class="profile-recommendation-tag"><?= htmlspecialchars((string) ($article['category_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></span>
+                        <h3><?= htmlspecialchars($article['title'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars(profile_excerpt((string) $article['content'], $articleSanitizer), ENT_QUOTES, 'UTF-8') ?></p>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($recommendations['faqs'])): ?>
+        <section class="profile-recommendation-section">
+            <div class="profile-recommendation-heading">
+                <div>
+                    <h2>سوالات پیشنهادی</h2>
+                    <p>FAQهای مرتبط با نیاز فعلی شما.</p>
+                </div>
+            </div>
+            <div class="profile-faq-list">
+                <?php foreach ($recommendations['faqs'] as $faq): ?>
+                    <details class="profile-faq-item">
+                        <summary><?= htmlspecialchars($faq['question'], ENT_QUOTES, 'UTF-8') ?></summary>
+                        <p><?= nl2br(htmlspecialchars($faq['answer'], ENT_QUOTES, 'UTF-8')) ?></p>
+                    </details>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
 </main>
 
 <?php include TEMPLATES_PATH . '/partials/footer.php'; ?>
