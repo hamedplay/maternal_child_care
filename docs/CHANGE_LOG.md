@@ -123,21 +123,7 @@ Scope توسعه قفل شد و هر تغییر باید مستقیماً به �
 کاربر صریحاً خواسته بود Repository مربوط به AI همزمان Business Logic و Database Access را نگهداری نکند. بعد از MCC-CHANGE-002 هنوز بخش مهمی از منطق در `AiKnowledgeRepository` باقی مانده بود.
 
 ### وضعیت قبل از تغییر
-`AiKnowledgeRepository` مسئول این موارد بود:
-
-- استخراج keyword
-- stopword filtering
-- light stemming
-- synonym expansion
-- تشخیص سن کودک
-- تشخیص جنسیت
-- scoring/ranking
-- تبدیل HTML مقاله به متن
-- انتخاب snippet مرتبط
-- ساخت context block
-- اجرای SQL روی جداول مختلف
-
-در نتیجه Repository هم Data Access بود و هم Retrieval/Business Logic.
+`AiKnowledgeRepository` مسئول extraction، stemming، synonym expansion، تشخیص سن/جنسیت، scoring/ranking، تبدیل HTML به متن، snippet، context building و SQL بود.
 
 ### هدف
 Repository فقط Query اجرا کند و Row خام برگرداند. تمام تحلیل سؤال، ranking و ساخت context به Service layer منتقل شود.
@@ -149,13 +135,9 @@ Repository فقط Query اجرا کند و Row خام برگرداند. تمام
 2. `AiKnowledgeRepository` → فقط Data Access.
 3. `KnowledgeRetriever` → orchestration، scoring/ranking و Context Building.
 
-این تقسیم دقیقاً بر اساس نیاز اولیه کاربر انجام شد و هیچ لایه یا Pattern اضافه‌ای خارج از این نیاز ایجاد نشد.
-
 ### فایل‌های تغییرکرده
 
 #### Updated — `app/Services/QueryPreprocessor.php`
-مسئولیت‌های زیر به این Service منتقل شد:
-
 - normalize حروف فارسی/عربی
 - تبدیل اعداد فارسی/عربی
 - stopword filtering
@@ -164,88 +146,34 @@ Repository فقط Query اجرا کند و Row خام برگرداند. تمام
 - استخراج سن بر حسب ماه
 - استخراج جنسیت
 
-متد `analyze()` اکنون خروجی ساختاریافته زیر را تولید می‌کند:
-
-- `question`
-- `keywords`
-- `age_months`
-- `gender`
+`analyze()` خروجی `question`, `keywords`, `age_months`, `gender` تولید می‌کند.
 
 #### Updated — `app/Repositories/AiKnowledgeRepository.php`
-منطق preprocessing، scoring و context formatting حذف شد.
-
-Repository اکنون فقط متدهای Data Access دارد، از جمله:
-
-- `findFaqs()`
-- `findArticles()`
-- `findPregnancyNutrition()`
-- `findPregnancyWeeks()`
-- `findPregnancyWarningSigns()`
-- `findPregnancyExercises()`
-- `findPregnancySupplements()`
-- `findMilestonesByAge()`
-- `findMilestonesByKeywords()`
-- `findGrowthByAgeAndGender()`
-
-خروجی این متدها Row خام دیتابیس است و Repository دیگر تصمیم نمی‌گیرد چه نتیجه‌ای مهم‌تر است یا چگونه باید به LLM نمایش داده شود.
+preprocessing، scoring و context formatting حذف شد. Repository فقط متدهای Data Access دارد.
 
 #### Updated — `app/Services/KnowledgeRetriever.php`
-منطق زیر از Repository به Retriever منتقل شد:
-
-- انتخاب sourceهای RAG
-- scoring بر اساس keyword match
-- ranking
-- محدودکردن نتایج هر منبع
-- تبدیل HTML article به متن
-- ساخت snippet مرتبط
-- ساخت context block نهایی برای `LlmService`
-- محدودکردن context کلی به ۱۲ block مانند رفتار قبلی
+source selection، scoring/ranking، HTML-to-text، snippet و context building به Retriever منتقل شد.
 
 ### Before → After
+**Before:** `Repository = SQL + Preprocessing + Ranking + Context Builder`
 
-**Before**
+**After:**
+- `QueryPreprocessor = Query Analysis`
+- `AiKnowledgeRepository = Database Access Only`
+- `KnowledgeRetriever = Retrieval + Ranking + Context Building`
 
-`Repository = SQL + Preprocessing + Ranking + Context Builder`
-
-**After**
-
-`QueryPreprocessor = Query Analysis`
-
-`AiKnowledgeRepository = Database Access Only`
-
-`KnowledgeRetriever = Retrieval + Ranking + Context Building`
-
-### نکته مربوط به Keyword Processing
-در همان Scope اولیه، تکمیل Keyword Processing و پشتیبانی بهتر از اعداد فارسی خواسته شده بود. در این Change:
-
-- نرمال‌سازی اعداد فارسی و عربی در یک محل مرکزی انجام می‌شود.
-- WORD_NUMBERS از ۱ تا ۲۰ تکمیل شد؛ در نسخه قبلی برخی اعداد بین ۱۲ و ۲۰ وجود نداشتند.
-- synonym و stemming از Repository خارج شدند تا بعداً بدون دست‌زدن به SQL قابل توسعه باشند.
-
-### اثر روی دیتابیس
-هیچ Schema یا داده‌ای تغییر نکرد.
-
-### اثر روی endpoint و LLM
-قرارداد `KnowledgeRetriever::retrieve()` و خروجی `string[]` برای `LlmService` حفظ شد؛ بنابراین endpoint نیازی به تغییر جدید نداشت.
+### Keyword Processing
+- اعداد فارسی و عربی مرکزی normalize می‌شوند.
+- WORD_NUMBERS از ۱ تا ۲۰ تکمیل شد.
+- synonym و stemming از Repository خارج شدند.
 
 ### Validation / Test
-
-1. فایل‌های نهایی از شاخه `main` دوباره خوانده شدند و مسئولیت Repository بررسی شد؛ Repository جدید فقط Query و Row خام دارد.
-2. Retriever از متدهای جدید Repository استفاده می‌کند و scoring/context building در Service layer قرار گرفته است.
-3. `QueryPreprocessor.php` با `php -l` بررسی شد و نتیجه `No syntax errors detected` بود.
-4. Functional test محلی QueryPreprocessor در محیط ابزار متوقف شد، چون PHP نصب‌شده در محیط Validation فاقد extension `mbstring` است و `mb_strlen()` را ندارد.
-5. این محدودیت وابستگی جدیدی ایجادشده توسط Change نیست؛ نسخه قبلی پروژه نیز در AI از `mb_*` استفاده می‌کرد. بنابراین Runtime واقعی پروژه باید همچنان PHP `mbstring` داشته باشد.
-6. اتصال واقعی به MariaDB و OpenRouter از این محیط انجام نشده، پس نتیجه Runtime end-to-end در این Change ادعا نمی‌شود.
-
-### Rollback
-برای Rollback باید سه فایل زیر به وضعیت MCC-CHANGE-002 برگردند:
-
-- `app/Services/QueryPreprocessor.php`
-- `app/Repositories/AiKnowledgeRepository.php`
-- `app/Services/KnowledgeRetriever.php`
+- فایل‌های نهایی از `main` بازخوانی شدند.
+- `QueryPreprocessor.php` با `php -l` بدون خطای Syntax بود.
+- functional test محلی به دلیل نبود extension `mbstring` در PHP محیط ابزار متوقف شد؛ پروژه قبلاً نیز به `mb_*` وابسته بود.
 
 ### نتیجه نهایی
-در پایان این Change، بخش اصلی فاز ۱ انجام شده است: Database Access مربوط به RAG از preprocessing، ranking و Context Building جدا شده و ساختار خواسته‌شده برای Retriever مستقل وجود دارد.
+Database Access مربوط به RAG از preprocessing، ranking و Context Building جدا شد.
 
 ---
 
@@ -255,105 +183,160 @@ Repository اکنون فقط متدهای Data Access دارد، از جمله:
 2026-10-15
 
 ### درخواست / مسئله
-در درخواست اولیه، Login/Register با OTP کاوه‌نگار خواسته شده بود و لازم بود کدی که برای کاربر ارسال می‌شود در سمت سرور قابل verify باشد.
+Login/Register با OTP کاوه‌نگار و verify سمت سرور جزء درخواست اولیه بود.
 
-بررسی واقعی نشان داد زیرساخت اصلی از قبل وجود دارد: `AuthService`، `OtpRepository`، `KavenegarService`، endpointهای send/verify، UI مربوط به OTP و جدول `otp_verifications` در دیتابیس.
+### وضعیت قبل
+زیرساخت اصلی از قبل وجود داشت: `AuthService`، `OtpRepository`، `KavenegarService`، endpointهای send/verify، UI OTP و جدول `otp_verifications`.
 
-### وضعیت قبل از تغییر
-چرخه `requestOtp()` به این ترتیب بود:
-
-1. تولید OTP و hash.
-2. invalidate کردن OTP قبلی.
-3. ثبت OTP جدید در DB.
-4. تلاش برای ارسال SMS با Kavenegar.
-
-این ترتیب یک مشکل مستقیم داشت: اگر Kavenegar خطا می‌داد، OTP قبلی کاربر از قبل باطل شده بود و OTP جدیدی که هرگز به کاربر نرسیده بود در دیتابیس فعال باقی می‌ماند. همان رکورد می‌توانست cooldown و rate-limit را هم فعال کند.
-
-### Root Cause
-Persistence و invalidate شدن OTP قبل از مشخص‌شدن نتیجه ارسال Provider انجام می‌شد.
-
-### هدف
-فقط OTPای در دیتابیس به‌عنوان کد قابل verify ثبت شود که مرحله ارسال آن موفق بوده باشد؛ در صورت خطای Provider، وضعیت قبلی کاربر خراب نشود.
-
-### فایل‌های تغییرکرده
-
-#### Updated — `app/Services/AuthService.php`
-ترتیب عملیات `requestOtp()` تغییر کرد.
-
-**Before**
+چرخه قبلی:
 
 `generate → invalidate old → persist new → send SMS`
 
-**After**
+اگر Kavenegar خطا می‌داد، کد قبلی باطل و یک OTP ارسال‌نشده در DB فعال می‌ماند.
+
+### Root Cause
+Persistence و invalidate قبل از مشخص‌شدن نتیجه Provider انجام می‌شد.
+
+### فایل‌های تغییرکرده
+
+#### `app/Services/AuthService.php`
+ترتیب به این شکل تغییر کرد:
 
 `generate → send SMS → invalidate old → persist new`
 
-اگر `sendOtp()` خطا بدهد، هیچ OTP قبلی invalidate نمی‌شود و هیچ OTP ارسال‌نشده در DB ثبت نمی‌شود.
+#### `app/Services/KavenegarService.php`
+`type=sms` به Verify Lookup اضافه شد.
 
-ذخیره plaintext OTP اضافه نشد. verify همچنان با `HMAC-SHA256` و `hash_equals()` انجام می‌شود که نیاز «وجود کد در سمت سرور برای بررسی» را بدون نگهداری متن خام OTP پوشش می‌دهد.
+### Verification Model
+OTP plaintext در DB ذخیره نمی‌شود. `code_hash` با HMAC-SHA256 ذخیره می‌شود و verify با `hash_equals()` انجام می‌شود.
 
-#### Updated — `app/Services/KavenegarService.php`
-پارامتر زیر به Verify Lookup اضافه شد:
-
-`type=sms`
-
-تا channel موردنیاز کاربر به‌صورت صریح SMS باشد.
-
-### تطبیق با Kavenegar
-مسیر استفاده‌شده همان Verify Lookup کاوه‌نگار است و پارامترهای اصلی `receptor`، `token`، `template` و `type` با مستندات/API فعلی این سرویس مطابقت دارند.
-
-### وضعیت Configuration
-
-کلید و Template از این متغیرهای محیطی خوانده می‌شوند:
-
+### Configuration
 - `KAVENEGAR_API_KEY`
 - `KAVENEGAR_OTP_TEMPLATE`
 
-در صورت نبود API Key، حالت Development موجود پروژه حفظ شده و `debug_code` فقط برای تست محلی برگردانده می‌شود.
+### Validation
+- Schema واقعی OTP بررسی شد.
+- UI و endpointها بررسی شدند.
+- Kavenegar Verify Lookup با مستندات فعلی تطبیق داده شد.
+- منطق اصلاح‌شده AuthService با `php -l` بدون خطای Syntax بود.
+- تست SMS واقعی به credential محیط اجرا وابسته است.
 
-### دیتابیس
-Dump واقعی تأیید کرد جدول `otp_verifications` ستون‌های زیر را برای همین workflow دارد:
+### نتیجه
+Workflow کد آماده است؛ End-to-End SMS بعد از تنظیم credential واقعی باید Validation شود.
 
-- `phone`
-- `code_hash`
-- `attempts`
-- `max_attempts`
-- `is_verified`
-- `is_invalidated`
-- `expires_at`
-- `verified_at`
-- `ip_address`
+---
+
+## MCC-CHANGE-005 — رفع آلودگی JSON در endpoint هوش مصنوعی ناشی از session_start تکراری
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+در درخواست اولیه گفته شده بود اولین درخواست AI گاهی/در شروع کار نمی‌کند و باید Root Cause بررسی شود.
+
+### بررسی
+`config/config.php` در ابتدای هر Request اگر session فعال نباشد `session_start()` را اجرا می‌کند. با این حال `public/ai-qa-ask.php` بعد از require کردن همین config دوباره `session_start()` اجرا می‌کرد.
+
+در PHP، فراخوانی `session_start()` روی session فعال Notice تولید می‌کند. اگر `display_errors` در محیط روشن باشد، این Notice می‌تواند قبل از JSON در Response چاپ شود. Frontend از `res.json()` استفاده می‌کند؛ در نتیجه Response آلوده به Notice دیگر JSON معتبر نیست و مسیر `.catch()` اجرا می‌شود.
+
+### Root Cause
+شروع دوباره session در JSON endpoint در حالی که session قبلاً در bootstrap پروژه شروع شده بود.
+
+### تغییر
+در `public/ai-qa-ask.php` فراخوانی اضافی `session_start()` حذف شد. مدیریت session فقط در `config/config.php` باقی ماند.
+
+### Before → After
+**Before:** `config.php session_start → ai-qa-ask.php session_start دوباره → احتمال Notice قبل از JSON`
+
+**After:** `config.php session_start → ai-qa-ask.php استفاده مستقیم از session موجود`
+
+### Validation
+- رفتار PHP در محیط local با دو بار `session_start()` تست شد و Notice `Ignoring session_start() because a session is already active` بازتولید شد.
+- نسخه endpoint از `main` بازخوانی و حذف فراخوانی دوم تأیید شد.
+- تست Browser/Server واقعی هنوز انجام نشده، بنابراین ادعا نمی‌شود این تنها علت همه حالت‌های «اولین درخواست» بوده است؛ اما این defect قطعی از مسیر JSON حذف شد.
+
+### نتیجه
+یک Root Cause واقعی که می‌توانست Response اولین/درخواست‌های AI را در محیط‌های نمایش‌دهنده Notice خراب کند حذف شد.
+
+---
+
+## MCC-CHANGE-006 — ذخیره سؤال و پاسخ AI در دیتابیس
+
+### تاریخ
+2026-10-15
+
+### درخواست / مسئله
+در درخواست اولیه خواسته شده بود سؤال‌های AI و تعاملات گفتگو در DB ذخیره شوند تا بعداً برای history و personalization قابل استفاده باشند.
+
+### وضعیت قبل
+AI history فقط در `$_SESSION['ai_chat_history']` بود. با پایان session یا تغییر مرورگر، تاریخچه پایدار در DB وجود نداشت. Dump واقعی نیز جدول `ai_conversations` یا `ai_messages` نداشت.
+
+### هدف
+ذخیره پایدار گفتگو بدون تغییر دادن Dump تاریخی موجود و بدون مخلوط‌کردن Persistence با LLM/Retrieval logic.
+
+### تغییرات دیتابیس
+فایل جدید:
+
+`database/migrations/20261015_001_create_ai_conversations.sql`
+
+دو جدول ایجاد می‌کند:
+
+#### `ai_conversations`
+- `id`
+- `user_id` nullable
+- `session_key` unique
+- `created_at`
+- `updated_at`
+
+`user_id` به `users.id` متصل است. nullable بودن اجازه می‌دهد کاربر مهمان هم گفتگو داشته باشد.
+
+#### `ai_messages`
+- `id`
+- `conversation_id`
+- `role` (`user` / `assistant`)
+- `content`
+- `model`
 - `created_at`
 
-بنابراین برای این اصلاح Schema جدیدی لازم نبود.
+### فایل جدید
+`app/Repositories/AiConversationRepository.php`
 
-### UI / Endpoint
+مسئول Data Access است:
+- `getOrCreateConversation()`
+- `addMessage()`
 
-- `auth-modal.js` به `auth-send-otp.php` و `auth-verify-otp.php` وصل است.
-- `auth-send-otp.php` از `AuthService::requestOtp()` استفاده می‌کند.
-- `auth-verify-otp.php` بعد از verify موفق session کاربر را ایجاد می‌کند.
+اگر conversation در حالت مهمان ایجاد شده باشد و کاربر بعداً در همان session Login کند، Repository در مراجعه بعدی `user_id` را به همان conversation متصل می‌کند.
 
-در این Change UI تغییر نکرد، چون wiring موجود با نیاز فعلی سازگار بود.
+### Endpoint
+`public/ai-qa-ask.php` اکنون:
 
-### Validation / Test
+1. conversation را با `session_id()` پیدا/ایجاد می‌کند.
+2. سؤال کاربر را قبل از ارسال به LLM ذخیره می‌کند.
+3. پاسخ assistant را همراه نام model ذخیره می‌کند.
+4. history session قبلی را همچنان برای context کوتاه‌مدت حفظ می‌کند.
 
-1. Schema واقعی OTP از Dump دیتابیس بررسی شد.
-2. endpointهای send و verify و UI واقعی خوانده شدند و مسیر کامل درخواست تأیید شد.
-3. مستندات/نمونه‌های فعلی Kavenegar Verify Lookup بررسی شد و پارامترهای استفاده‌شده با آن سازگارند.
-4. نسخه اصلاح‌شده منطق `AuthService` با `php -l` بررسی شد و خطای Syntax نداشت.
-5. ارسال SMS واقعی تست نشده، چون API Key و Template واقعی محیط اجرا در اختیار این Validation نیستند.
+### رفتار در صورت Migration اعمال‌نشده
+Repository خطای DB را log و `null` برمی‌گرداند؛ در نتیجه AI response به‌خاطر نبود جدول جدید قطع نمی‌شود. پس از اعمال migration، persistence فعال می‌شود.
+
+### چرا دو جدول؟
+Conversation هویت یک رشته گفتگو را نگه می‌دارد و Message هر turn را. این ساختار برای درخواست صریح history/personalization لازم است و از ذخیره سؤال و پاسخ در یک فیلد تخت جلوگیری می‌کند.
+
+### Validation
+1. Schema جدید با MariaDB 10.4 و نوع `users.id` (`int unsigned`) تطبیق داده شد.
+2. Foreign Key و Indexهای موردنیاز در migration تعریف شدند.
+3. `AiConversationRepository.php` با `php -l` بدون خطای Syntax بود.
+4. نسخه endpoint متصل به Repository با `php -l` بدون خطای Syntax بود.
+5. Migration روی دیتابیس واقعی اجرا نشده، چون اتصال مستقیم به DB محیط پروژه در این گفتگو موجود نیست؛ بنابراین ایجاد فیزیکی جدول‌ها هنوز باید روی محیط اجرا انجام شود.
 
 ### Rollback
-برای بازگشت، `AuthService.php` و `KavenegarService.php` به نسخه قبل از MCC-CHANGE-004 برگردند.
+در صورت Rollback ابتدا `ai_messages` و سپس `ai_conversations` حذف می‌شوند و endpoint به نسخه بدون Persistence برمی‌گردد.
 
-### نتیجه نهایی
-کد OTP/Kavenegar از نظر workflow آماده است و مشکل خراب‌شدن OTP در خطای ارسال اصلاح شده است. تکمیل Validation فاز ۲ به تنظیم credential واقعی Kavenegar و اجرای تست End-to-End وابسته است.
+### نتیجه
+کد و migration لازم برای ذخیره پایدار سؤال/پاسخ AI آماده است؛ فعال‌شدن واقعی آن نیازمند اجرای migration روی MariaDB پروژه است.
 
 ---
 
 ## قواعد ادامه کار
-
-برای ادامه پروژه:
 
 1. Feature بعدی فقط از Roadmap Scope-locked انتخاب می‌شود.
 2. قبل از هر تغییر، وضعیت واقعی کد و دیتابیس بررسی می‌شود.
