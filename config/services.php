@@ -12,6 +12,7 @@ return [
 
     'bale' => [
         'bot_token' => getenv('BALE_BOT_TOKEN') ?: '',
+        'bot_username' => getenv('BALE_BOT_USERNAME') ?: '',
         'webhook_secret' => getenv('BALE_WEBHOOK_SECRET') ?: '',
     ],
 
