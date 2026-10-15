@@ -21,81 +21,108 @@
 
 # فاز ۱ — AI/RAG و جداسازی Data Access
 
-**وضعیت: انجام‌شده برای بخش جداسازی معماری؛ ادامه قابلیت‌های AI در فاز ۳**
+**وضعیت: انجام‌شده**
 
-## نیازهای پوشش‌داده‌شده
+## انجام‌شده
 
 - جدا کردن Database Access از Logic.
-- ایجاد Retriever مستقل.
-- جدا کردن Keyword Processing از Repository.
-- نرمال‌سازی اعداد فارسی/عربی و متن فارسی.
+- ایجاد `KnowledgeRetriever` مستقل.
+- انتقال Keyword Processing به `QueryPreprocessor`.
+- نرمال‌سازی حروف و اعداد فارسی/عربی.
+- انتقال scoring/ranking/context building از Repository به Service.
 
-## ساختار نهایی این فاز
+## ساختار نهایی
 
 `Endpoint → KnowledgeRetriever → QueryPreprocessor + AiKnowledgeRepository → LlmService`
 
-- `QueryPreprocessor` = normalize + keywords + age/gender extraction
+- `QueryPreprocessor` = normalize + keyword/entity/domain analysis
 - `AiKnowledgeRepository` = Data Access only
 - `KnowledgeRetriever` = source selection + ranking + context building
 
-جزئیات در `MCC-CHANGE-002` و `MCC-CHANGE-003` ثبت شده است.
+جزئیات: `MCC-CHANGE-002`, `MCC-CHANGE-003`, `MCC-CHANGE-007`.
 
 ---
 
 # فاز ۲ — Login/Register و OTP با Kavenegar
 
-**وضعیت: در حال اجرا — کد Integration آماده است؛ ارسال واقعی نیازمند credential محیط اجرا است**
+**وضعیت: پیاده‌سازی کد انجام‌شده؛ تست SMS واقعی وابسته به credential محیط اجرا**
 
-## Scope
+## انجام‌شده
 
-- ارسال OTP به شماره موبایل از Kavenegar Verify Lookup.
-- نگهداری server-side اطلاعات لازم برای verify بدون ذخیره OTP plaintext.
-- Verify کد واردشده.
-- Login/Register خودکار بعد از verify.
-- Resend، expiry و محدودیت تلاش.
+- بررسی کامل UI → send endpoint → AuthService → Kavenegar → verify endpoint.
+- حفظ OTP به‌صورت hash برای server-side verification.
+- اصلاح ترتیب ارسال/ثبت OTP تا SMS شکست‌خورده OTP قبلی را خراب نکند.
+- اتصال صریح Verify Lookup با `type=sms`.
 
-## وضعیت واقعی فعلی
+## باقی‌مانده محیط اجرا
 
-- `AuthService` وجود دارد.
-- `OtpRepository` وجود دارد.
-- `KavenegarService` وجود دارد.
-- endpointهای send/verify وجود دارند.
-- UI Login/OTP به endpointها متصل است.
-- جدول `otp_verifications` در دیتابیس واقعی وجود دارد.
-- API Key از `KAVENEGAR_API_KEY` و Template از `KAVENEGAR_OTP_TEMPLATE` خوانده می‌شوند.
+- تنظیم `KAVENEGAR_API_KEY`.
+- تنظیم `KAVENEGAR_OTP_TEMPLATE`.
+- تست واقعی send / wrong-code / expiry / resend.
 
-## کار باقی‌مانده
-
-- تنظیم API Key و Template واقعی در محیط اجرا.
-- تست واقعی ارسال SMS، wrong code، expiry و resend روی سرور متصل به Kavenegar.
+جزئیات: `MCC-CHANGE-004`.
 
 ---
 
 # فاز ۳ — تکمیل AI/RAG
 
-**وضعیت: بعد از فاز ۲**
+**وضعیت: بخش اصلی پیاده‌سازی انجام‌شده؛ Migration و E2E واقعی هنوز باید روی محیط پروژه اجرا شوند**
 
-## Scope
+## انجام‌شده
 
-- پیدا کردن Root Cause باگ «اولین درخواست AI کار نمی‌کند».
-- تکمیل keywordها/synonymهای domain در حد نیاز واقعی.
-- استفاده از Retriever مستقل ایجادشده در فاز ۱.
-- اتصال context دیتابیس به Prompt و OpenRouter.
-- تنظیم OpenRouter از `config/ai.php` طبق درخواست.
-- ذخیره سؤال و پاسخ AI در دیتابیس.
+- رفع defect قطعی duplicate `session_start()` در JSON endpoint.
+- تکمیل Persian normalization، numbers و بخشی از domain synonyms.
+- Domain Detection برای تفکیک pregnancy / child / general.
+- اضافه شدن منابع واقعی کودک به RAG:
+  - child_nutrition
+  - child_supplements
+  - common_conditions
+  - vaccination_schedule
+  - development_milestones
+  - growth_standards
+- هماهنگ‌سازی System Prompt با Pregnancy + Infant/Child context.
+- ایجاد persistence برای AI conversations/messages با Migration جدید.
+- ذخیره سؤال و پاسخ AI از endpoint.
+
+## باقی‌مانده محیط اجرا
+
+- اجرای `database/migrations/20261015_001_create_ai_conversations.sql` روی MariaDB پروژه.
+- تست End-to-End Retriever → OpenRouter → DB persistence روی محیط واقعی.
+
+جزئیات: `MCC-CHANGE-005`, `MCC-CHANGE-006`, `MCC-CHANGE-007`.
 
 ---
 
 # فاز ۴ — Infant/Child Content و Crawler
 
-**وضعیت: برنامه‌ریزی‌شده**
+**وضعیت: شروع‌شده**
 
-## Scope
+## انجام‌شده
 
-- انتخاب منبع معتبر برای محتوای نوزاد/کودک.
-- تکمیل بخش نوزاد.
-- ایجاد/تکمیل بخش کودک مشابه Pregnancy.
-- Crawler و export/import موردنیاز.
+- بررسی ساختار واقعی Child tables در Dump.
+- بررسی وضعیت UI: صفحات Pregnancy وجود دارند ولی Child section هم‌سطح آن هنوز در `public/` کامل نیست.
+- انتخاب CDC Developmental Milestones به‌عنوان منبع اولیه معتبر.
+- بررسی robots.txt مسیرهای CDC Developmental Milestones.
+- بررسی شرایط reuse متن CDC و الزام Attribution/Non-endorsement.
+- ایجاد Crawler مستقل:
+  - `tools/crawlers/cdc_milestones.php`
+- ایجاد مستند اجرای crawler:
+  - `tools/crawlers/README.md`
+- خروجی crawler به‌صورت JSON با provenance منبع، سن، دسته و متن milestone.
+
+## تصمیم اجرایی
+
+Crawler مستقیماً داده انگلیسی CDC را وارد DB فارسی نمی‌کند. مسیر داده:
+
+`CDC → Raw JSON Export → ترجمه/بازبینی → Import → DB`
+
+این جداسازی برای جلوگیری از آلوده‌شدن دیتابیس فارسی با Raw English Source است و مستقیماً به نیاز crawler/export مربوط می‌شود.
+
+## باقی‌مانده
+
+- اجرای crawler در محیط دارای اینترنت و بررسی Export واقعی.
+- آماده‌سازی Import محتوای بازبینی‌شده.
+- تکمیل صفحات Child/Infant مشابه ساختار Pregnancy با استفاده از جداول موجود.
 
 ---
 
@@ -121,9 +148,10 @@
 - کامل‌تر شدن پروفایل.
 - ورود داده‌های شخصی موردنیاز بعد از Login.
 - ذخیره تعاملات در DB در محدوده درخواست اولیه.
-- ذخیره AI chat.
 - Personalization.
 - پیشنهاد Article/FAQ بر اساس نیاز کاربر.
+
+نکته: ذخیره AI chat از این Scope زودتر در فاز ۳ انجام شد چون مستقیماً بخشی از pipeline AI بود.
 
 ---
 
