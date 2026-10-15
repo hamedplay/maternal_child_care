@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../config/config.php';
 
-use App\Repositories\AiKnowledgeRepository;
+use App\Services\KnowledgeRetriever;
 use App\Services\LlmService;
 
 session_start();
@@ -39,8 +39,8 @@ $maxHistory = $aiConfig['max_history_messages'];
 // فقط N پیام آخر رو برای context به مدل می‌فرستیم (کنترل هزینه و طول درخواست)
 $recentHistory = array_slice($_SESSION['ai_chat_history'], -$maxHistory);
 
-$knowledgeRepository = new AiKnowledgeRepository();
-$contextBlocks = $knowledgeRepository->search($question);
+$knowledgeRetriever = new KnowledgeRetriever();
+$contextBlocks = $knowledgeRetriever->retrieve($question);
 
 $llmService = new LlmService();
 $answer = $llmService->ask($question, $contextBlocks, $recentHistory);
