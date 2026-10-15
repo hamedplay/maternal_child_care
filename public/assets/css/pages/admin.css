@@ -1,0 +1,87 @@
+.admin-page {
+    width: min(1280px, calc(100% - 32px));
+    margin: 36px auto 80px;
+}
+
+.admin-hero {
+    padding: 28px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f2fbfa, #f8fbff);
+    margin-bottom: 24px;
+}
+
+.admin-hero h1 { margin: 0 0 8px; color: #17324d; }
+.admin-hero p { margin: 0; color: #657789; line-height: 1.8; }
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 26px;
+}
+
+.admin-stat {
+    background: #fff;
+    border: 1px solid #e5edf2;
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.admin-stat strong { display: block; font-size: 28px; color: #166c72; margin-bottom: 4px; }
+.admin-stat span { color: #617485; }
+
+.admin-section {
+    margin-top: 26px;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #e5edf2;
+    border-radius: 18px;
+    box-shadow: 0 8px 26px rgba(26, 53, 77, .05);
+}
+
+.admin-section h2 { margin: 0 0 16px; color: #17324d; }
+
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; min-width: 850px; }
+.admin-table th,
+.admin-table td {
+    padding: 11px 12px;
+    text-align: right;
+    border-bottom: 1px solid #edf2f5;
+    vertical-align: top;
+    line-height: 1.7;
+}
+.admin-table th { background: #f7fafc; color: #385066; }
+.admin-table td { color: #566a7c; }
+
+.admin-message {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+}
+.admin-message.success { background: #effaf5; color: #25634a; }
+.admin-message.error { background: #fff2f2; color: #8a3535; }
+
+.admin-form-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.admin-form-inline select,
+.admin-form-inline input,
+.admin-form-inline textarea {
+    border: 1px solid #d7e1e7;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+}
+.admin-form-inline textarea { min-width: 280px; min-height: 80px; resize: vertical; }
+.admin-button {
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 13px;
+    background: #166c72;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+.admin-button.secondary { background: #607385; }
+.admin-muted { color: #82909d; font-size: 13px; }
+.admin-content { max-width: 520px; white-space: pre-wrap; word-break: break-word; }
+.admin-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #eef8f7; color: #166c72; font-size: 12px; }
